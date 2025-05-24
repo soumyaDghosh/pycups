@@ -1,6 +1,18 @@
 from cffi import FFI
-import warnings
+import pkgconfig
 
+LIBRARY = "cups3"
+VERSION = "3.0.0"
+
+def get_include_dirs():
+    include_dirs, lib_dirs = [], []
+    if not (pkgconfig.installed(LIBRARY, f"<={VERSION}")):
+        raise Exception("Cannot find pkg-config file for cups3.\nIs CUPS 3.0 development libraries properly installed?")
+    cflags = [c[2:] for c in (pkgconfig.cflags(LIBRARY).split(" "))]
+    libs = [lib[2:] for lib in pkgconfig.libs(LIBRARY).split(" ") if not lib.startswith("-l")]
+    return cflags, libs
+
+INCLUDE_DIRS, LIBRARY_DIRS = get_include_dirs()
 
 ffibuilder = FFI()
 
@@ -73,11 +85,12 @@ ffibuilder.cdef("""
     bool cupsEnumDests(unsigned flags, int msec, int *cancel, cups_ptype_t type, cups_ptype_t mask, cups_dest_cb_t cb, void *cb_data);
 """)
 
-
 ffibuilder.set_source(
-    "cups.internal.libcups_binding",
-    '#include "cups.h"',
-    libraries=["cups3"],
+    "cups._cups",
+    '#include <cups/cups.h>',
+    libraries=[LIBRARY],
+    include_dirs=INCLUDE_DIRS,
+    library_dirs=LIBRARY_DIRS,
 )
 
 if __name__ == "__main__":
