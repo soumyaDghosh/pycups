@@ -1,13 +1,12 @@
-from .internal import libcups_binding
-from cffi import FFI
+from . import _cups
 from typing import List
 from .types import (
     cupsDest,
     cupsOption
 )
 
-ffi: FFI = libcups_binding.ffi
-lib = libcups_binding.lib
+ffi = _cups.ffi
+lib = _cups.lib
 
 def getDests() -> List[cupsDest]:
     dests = ffi.new("cups_dest_t **")
