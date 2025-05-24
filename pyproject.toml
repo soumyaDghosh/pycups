@@ -1,0 +1,25 @@
+[project]
+name = "cups"
+description = "Python bindings and helpers for libcups"
+version = "3.0.0"
+authors = [
+    {name = "Soumyadeep Ghosh", email = "soumyadeepghosh2004@zohomail.in"}
+]
+readme = "README.md"
+dependencies = [
+    "cffi>=1.17.1",
+]
+classifiers=[
+        "Programming Language :: Python :: 3",
+        "Operating System :: POSIX :: Linux",
+        "Topic :: Software Development :: Libraries",
+]
+
+[build-system]
+requires = [
+    "setuptools>=42",
+    "wheel",
+    "cffi>=1.17.1",
+    "pkgconfig>=1.5.5"
+]
+build-backend = "setuptools.build_meta"
