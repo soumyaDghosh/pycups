@@ -1,0 +1,13 @@
+typedef struct _cups_lang_s cups_lang_t;
+bool		cupsLangAddStrings(const char *language, const char *strings);
+cups_lang_t	*cupsLangDefault(void);
+cups_lang_t	*cupsLangFind(const char *language);
+const char	*cupsLangFormatString(cups_lang_t *lang, char *buffer, size_t bufsize, const char *format, ...);
+cups_encoding_t	cupsLangGetEncoding(void);
+const char	*cupsLangGetName(cups_lang_t *lang);
+const char	*cupsLangGetString(cups_lang_t *lang, const char *s);
+bool		cupsLangLoadStrings(cups_lang_t *lang, const char *filename, const char *strings);
+ssize_t		cupsLangPrintf(FILE *fp, const char *format, ...);
+ssize_t		cupsLangPuts(FILE *fp, const char *message);
+void		cupsLangSetDirectory(const char *d);
+void		cupsLangSetLocale(char *argv[]);

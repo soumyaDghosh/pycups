@@ -1,0 +1,55 @@
+typedef enum cups_encoding_e		
+{
+  CUPS_ENCODING_AUTO = -1,		
+  CUPS_ENCODING_US_ASCII,		
+  CUPS_ENCODING_ISO8859_1,		
+  CUPS_ENCODING_ISO8859_2,		
+  CUPS_ENCODING_ISO8859_3,		
+  CUPS_ENCODING_ISO8859_4,		
+  CUPS_ENCODING_ISO8859_5,		
+  CUPS_ENCODING_ISO8859_6,		
+  CUPS_ENCODING_ISO8859_7,		
+  CUPS_ENCODING_ISO8859_8,		
+  CUPS_ENCODING_ISO8859_9,		
+  CUPS_ENCODING_ISO8859_10,		
+  CUPS_ENCODING_UTF_8,			
+  CUPS_ENCODING_ISO8859_13,		
+  CUPS_ENCODING_ISO8859_14,		
+  CUPS_ENCODING_ISO8859_15,		
+  CUPS_ENCODING_WINDOWS_874,		
+  CUPS_ENCODING_WINDOWS_1250,		
+  CUPS_ENCODING_WINDOWS_1251,		
+  CUPS_ENCODING_WINDOWS_1252,		
+  CUPS_ENCODING_WINDOWS_1253,		
+  CUPS_ENCODING_WINDOWS_1254,		
+  CUPS_ENCODING_WINDOWS_1255,		
+  CUPS_ENCODING_WINDOWS_1256,		
+  CUPS_ENCODING_WINDOWS_1257,		
+  CUPS_ENCODING_WINDOWS_1258,		
+  CUPS_ENCODING_KOI8_R,			
+  CUPS_ENCODING_KOI8_U,			
+  CUPS_ENCODING_ISO8859_11,		
+  CUPS_ENCODING_ISO8859_16,		
+  CUPS_ENCODING_MAC_ROMAN,		
+  CUPS_ENCODING_SBCS_END = 63,		
+  CUPS_ENCODING_WINDOWS_932,		
+  CUPS_ENCODING_WINDOWS_936,		
+  CUPS_ENCODING_WINDOWS_949,		
+  CUPS_ENCODING_WINDOWS_950,		
+  CUPS_ENCODING_WINDOWS_1361,		
+  CUPS_ENCODING_BG18030,		
+  CUPS_ENCODING_DBCS_END = 127,		
+  CUPS_ENCODING_EUC_CN,			
+  CUPS_ENCODING_EUC_JP,			
+  CUPS_ENCODING_EUC_KR,			
+  CUPS_ENCODING_EUC_TW,			
+  CUPS_ENCODING_JIS_X0213,		
+  CUPS_ENCODING_VBCS_END = 191		
+} cups_encoding_t;
+typedef unsigned long cups_utf32_t;	
+ssize_t		cupsCharsetToUTF8(char *dest, const char *src, const size_t maxout, const cups_encoding_t encoding);
+const char	*cupsEncodingString(cups_encoding_t value);
+cups_encoding_t	cupsEncodingValue(const char *s);
+ssize_t		cupsUTF8ToCharset(char *dest, const char *src, const size_t maxout, const cups_encoding_t encoding);
+ssize_t		cupsUTF8ToUTF32(cups_utf32_t *dest, const char *src, const size_t maxout);
+ssize_t		cupsUTF32ToUTF8(char *dest, const cups_utf32_t *src, const size_t maxout);
