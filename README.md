@@ -14,11 +14,19 @@ This binding is currently work in progress.
 
 ### APIs
 
-Currently implemented APIs are 
+Currently implemented APIs are:
+
+- #### Dests
+    - `cupsAddDests`
+    - `cupsCopyDest`
     - `cupsGetDests`
+    - `cupsGetDestWithURI`
     - `cupsSetDests`
     - `cupsAddDests`
+
+- #### Options
     - `cupsGetOption`
+
 
 ### License
 
