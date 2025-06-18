@@ -10,6 +10,10 @@ from typing import (
     Optional,
 )
 
+from .utils import (
+    _bytes_to_value,
+)
+
 _ffi = _cups.ffi
 _lib = _cups.lib
 
@@ -50,6 +54,24 @@ class cupsOption(cupsBaseClass):
     def to_dict(self) -> dict:
         return {"name": self.name, "value": self.value}
 
+    @classmethod
+    def from_cffi(cls, opt: Any) -> "cupsOption":
+        """
+        Convert a single CFFI dest struct to a Python cupsOption object.
+
+        Args:
+            dest (Any): The CFFI cups_option_t struct.
+
+        Returns:
+            cupsOption: The equivalent Python object.
+        """
+        opt_name: str = str(_bytes_to_value(opt.name))
+        opt_value: Optional[str] = _bytes_to_value(opt.value)
+        return cls(
+            name=opt_name,
+            value=opt_value,
+        )
+
 
 @dataclass
 class cupsDest(cupsBaseClass):
@@ -60,3 +82,49 @@ class cupsDest(cupsBaseClass):
 
     ffi_name = "cups_dest_t"
     ffi_free = "cupsFreeDests"
+
+    @classmethod
+    def from_cffi_list(cls, dests: Any, count: int) -> "Dict[str, cupsDest]":
+        """
+        Convert a list of CFFI dest structs to a list of python cupsDest.
+
+        Args:
+            dests (Any): The CFFI *cups_dest_t pointer.
+
+        Returns:
+            List[cupsDest]: The list of cupsDest.
+        """
+        results: Dict[str, cupsDest] = {}
+        for i in range(count):
+            new_dest: Any = dests.ffi_value[0][i]
+            results[str(_bytes_to_value(new_dest.name))] = cupsDest.from_cffi(
+                dest=new_dest
+            )
+
+        cls.cffi_free([count, dests.ffi_value[0]])
+
+        return results
+
+    @classmethod
+    def from_cffi(cls, dest: Any) -> "cupsDest":
+        """
+        Convert a single CFFI dest struct to a Python cupsDest object.
+
+        Args:
+            dest (Any): The CFFI cups_dest_t struct.
+
+        Returns:
+            cupsDest: The equivalent Python object.
+        """
+        dest_name: str = str(_bytes_to_value(dest.name))
+        dest_instance: Optional[str] = _bytes_to_value(dest.instance)
+        is_default: bool = bool(dest.is_default)
+
+        opts: Dict[str, cupsOption] = {}
+        for j in range(dest.num_options):
+            opt: Any = dest.options[j]
+            opts[str(_bytes_to_value(opt.name))] = cupsOption.from_cffi(opt=opt)
+
+        return cls(
+            name=dest_name, instance=dest_instance, is_default=is_default, options=opts
+        )
