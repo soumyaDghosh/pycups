@@ -1,3 +1,7 @@
+from .creds import (
+    areCredsValidForName,
+)
+
 from .dests import (
     addDests,
     copyDest,
