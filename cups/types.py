@@ -51,6 +51,8 @@ class cupsOption(cupsBaseClass):
     name: str
     value: Optional[Any]
 
+    ffi_name = "cups_option_t"
+
     def to_dict(self) -> dict:
         return {"name": self.name, "value": self.value}
 
@@ -71,6 +73,39 @@ class cupsOption(cupsBaseClass):
             name=opt_name,
             value=opt_value,
         )
+
+    @classmethod
+    def to_cffi_list(cls, opts: "List[cupsOption]") -> Any:
+        count = len(opts)
+        c_opts = _ffi.new(f"cups_option_t[{count}]")
+
+        for i, opt in enumerate(opts):
+            c_opts[i].name = _ffi.new("char[]", opt.name.encode("utf-8"))
+            c_opts[i].value = _ffi.new("char[]", str(opt.value).encode("utf-8") if opt.value is not None else b"")
+
+        return c_opts
+
+    @classmethod
+    def from_cffi_list(cls, opts: Any, count: int) -> "Dict[str, cupsOption]":
+        """
+        Convert a list of CFFI dest structs to a list of python cupsOption.
+
+        Args:
+            dests (Any): The CFFI *cups_option_t pointer.
+
+        Returns:
+            List[cupsOption]: The list of cupsDest.
+        """
+        results: Dict[str, cupsOption] = {}
+        for i in range(count):
+            new_opt: Any = opts.ffi_value[0][i]
+            results[str(_bytes_to_value(new_opt.name))] = cupsOption.from_cffi(
+                opt=new_opt
+            )
+
+        cls.cffi_free([count, opts.ffi_value[0]])
+
+        return results
 
 
 @dataclass

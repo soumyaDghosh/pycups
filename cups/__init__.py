@@ -1,8 +1,14 @@
 from .dests import (
     addDests,
+    copyDest,
     getDests,
-    getOption,
+    getDestWithURI,
     setDests,
+)
+
+from .options import (
+    addOption,
+    getOption,
 )
 from ._cups import (
     lib,
