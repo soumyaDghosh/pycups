@@ -1,8 +1,7 @@
-from cups.connection import (
+from .connection import (
     Connection,
 )
-
-from cups.generic import (
+from .generic import (
     getEncryption,
     setEncryption,
     getPort,
@@ -14,7 +13,10 @@ from cups.generic import (
     setDefaultDest,
 )
 
-from cups._cups import lib, ffi
+from ._cups import lib, ffi
+
+del connection  # noqa
+del generic  # noqa
 
 __all__ = [
     "Connection",
