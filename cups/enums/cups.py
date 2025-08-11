@@ -1,0 +1,16 @@
+from enum import IntFlag
+from cups import _cups
+
+_lib = _cups.lib
+
+
+class CUPSDestFlags(IntFlag):
+    NONE = _lib.CUPS_DEST_FLAGS_NONE
+    UNCONNECTED = _lib.CUPS_DEST_FLAGS_UNCONNECTED
+    MORE = _lib.CUPS_DEST_FLAGS_MORE
+    REMOVED = _lib.CUPS_DEST_FLAGS_REMOVED
+    ERROR = _lib.CUPS_DEST_FLAGS_ERROR
+    RESOLVING = _lib.CUPS_DEST_FLAGS_RESOLVING
+    CONNECTING = _lib.CUPS_DEST_FLAGS_CONNECTING
+    CANCELED = _lib.CUPS_DEST_FLAGS_CANCELED
+    DEVICE = _lib.CUPS_DEST_FLAGS_DEVICE
