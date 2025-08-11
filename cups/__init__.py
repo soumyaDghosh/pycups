@@ -1,20 +1,32 @@
-from .creds import (
-    areCredsValidForName,
+from cups.connection import (
+    Connection,
 )
 
-from .dests import (
-    addDests,
-    copyDest,
-    getDests,
-    getDestWithURI,
-    setDests,
+from cups.generic import (
+    getEncryption,
+    setEncryption,
+    getPort,
+    setPort,
+    getServer,
+    setServer,
+    getUser,
+    setUser,
+    setDefaultDest,
 )
 
-from .options import (
-    addOption,
-    getOption,
-)
-from ._cups import (
-    lib,
-    ffi
-)
+from cups._cups import lib, ffi
+
+__all__ = [
+    "Connection",
+    "getEncryption",
+    "setEncryption",
+    "getPort",
+    "setPort",
+    "getServer",
+    "setServer",
+    "getUser",
+    "setUser",
+    "setDefaultDest",
+    "lib",
+    "ffi",
+]

@@ -5,12 +5,20 @@ import pkgconfig
 LIBRARY = "cups3"
 VERSION = "3.0rc4"
 
+
 def get_include_dirs():
     if not (pkgconfig.installed(LIBRARY, f"<={VERSION}")):
-        raise Exception("Cannot find pkg-config file for cups3.\nIs CUPS 3.0 development libraries properly installed?")
+        raise Exception(
+            "Cannot find pkg-config file for cups3.\nIs CUPS 3.0 development libraries properly installed?"
+        )
     cflags = [c[2:] for c in (pkgconfig.cflags(LIBRARY).split(" "))]
-    libs = [lib[2:] for lib in pkgconfig.libs(LIBRARY).split(" ") if not lib.startswith("-l")]
+    libs = [
+        lib[2:]
+        for lib in pkgconfig.libs(LIBRARY).split(" ")
+        if not lib.startswith("-l")
+    ]
     return cflags, libs
+
 
 INCLUDE_DIRS, LIBRARY_DIRS = get_include_dirs()
 

@@ -1,10 +1,8 @@
-from . import _cups
-from typing import (
-    Any,
-    Optional
-)
+from cups import _cups
+from typing import Any, Optional
 
 _ffi = _cups.ffi
+
 
 def _strtobool(val: str) -> Optional[bool]:
     """Convert a string representation of truth to true (1) or false (0).
@@ -14,12 +12,13 @@ def _strtobool(val: str) -> Optional[bool]:
     'val' is anything else.
     """
     val = val.lower()
-    if val in ('y', 'yes', 't', 'true', 'on', '1'):
+    if val in ("y", "yes", "t", "true", "on", "1"):
         return True
-    elif val in ('n', 'no', 'f', 'false', 'off', '0'):
+    elif val in ("n", "no", "f", "false", "off", "0"):
         return False
     else:
         return None
+
 
 def _bytes_to_value(b: bytes) -> Optional[Any]:
     if b == _ffi.NULL:
@@ -28,9 +27,6 @@ def _bytes_to_value(b: bytes) -> Optional[Any]:
     string_to_bool: Optional[bool] = _strtobool(string)
     if isinstance(string_to_bool, bool):
         return string_to_bool
-    if (
-        string
-        and string.split(",")[0] != "none"
-    ):
+    if string and string.split(",")[0] != "none":
         return string
     return None
