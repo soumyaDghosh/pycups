@@ -22,7 +22,7 @@ class IPPAttribute(cupsBaseClass):
     def name(self) -> str:
         c_name = _lib.ippGetName(self.ffi_value)
         if c_name == _ffi.NULL:
-            return None
+            return ""
         return str(_bytes_to_value(c_name))
 
     @property
@@ -46,9 +46,9 @@ class IPPAttribute(cupsBaseClass):
             IPPTag.ADMINDEFINE,
         ]:
             return []
-        if self.value_tag == [IPPTag.INTEGER, IPPTag.ENUM, IPPTag.RANGE]:
+        if self.value_tag in [IPPTag.INTEGER, IPPTag.ENUM, IPPTag.RANGE]:
             return [_lib.ippGetInteger(self.ffi_value, i) for i in range(self.count)]
-        elif self.value_tag == [
+        elif self.value_tag in [
             IPPTag.TEXT,
             IPPTag.NAME,
             IPPTag.KEYWORD,
@@ -147,7 +147,7 @@ class IPPError(Exception):
 
     @property
     def status(self) -> IPPStatus:
-        return self.response.statuscode
+        return self._response.statuscode
 
     @property
     def message(self) -> str:
