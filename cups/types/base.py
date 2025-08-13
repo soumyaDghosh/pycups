@@ -13,12 +13,10 @@ class cupsBaseClass:
     ffi_free: ClassVar[str]
     ffi_value: Any = field(repr=False)
 
-    @classmethod
-    # This method actually returns a CData
-    def cffi_new(cls, extra_args: Optional[str] = None) -> Any:
-        ffi_struct: str = f"{cls.ffi_name} {extra_args}" if extra_args else cls.ffi_name
-        cls.ffi_value = _ffi.new(ffi_struct)
-        return cls
+    def cffi_new(self, extra_args: Optional[str] = None) -> "cupsBaseClass":
+        ffi_struct: str = f"{self.ffi_name} {extra_args}" if extra_args else self.ffi_name
+        self.ffi_value = _ffi.new(ffi_struct)
+        return self
 
     @classmethod
     def cffi_free(cls, extra_args: Optional[List]):
