@@ -104,7 +104,7 @@ class cupsDest(cupsBaseClass):
     ffi_free = "cupsFreeDests"
 
     @classmethod
-    def from_cffi_list(cls, dests: Any, count: int) -> "Dict[str, cupsDest]":
+    def from_cffi_list(cls, dests: "cupsDest", count: int) -> "Dict[str, cupsDest]":
         """
         Convert a list of CFFI dest structs to a list of python cupsDest.
 
