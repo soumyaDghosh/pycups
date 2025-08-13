@@ -13,6 +13,7 @@ from cups.enums.http import HttpEncryption
 from typing import Any, Optional
 
 from .dests import DestsMixin
+from .jobs import JobMixin
 
 import socket
 
@@ -20,7 +21,7 @@ _ffi = _cups.ffi
 _lib = _cups.lib
 
 
-class Connection(DestsMixin):
+class Connection(DestsMixin, JobMixin):
     """Connection to the CUPS server."""
 
     http: Any = None
