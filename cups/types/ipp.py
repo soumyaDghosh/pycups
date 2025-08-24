@@ -58,7 +58,7 @@ class IPPAttribute(cupsBaseClass):
             IPPTag.LANGUAGE,
         ]:
             return [
-                _bytes_to_value(_lib.ippGetString(self.ffi_value, i))
+                _bytes_to_value(_lib.ippGetString(self.ffi_value, i, _ffi.NULL))
                 for i in range(self.count)
             ]
         elif self.value_tag == IPPTag.BOOLEAN:
