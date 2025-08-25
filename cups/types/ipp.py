@@ -108,7 +108,6 @@ class IPPRequest(cupsBaseClass):
 
         elif arg and self._is_valid_ctype(arg):
             self.ffi_value = arg
-            return None
 
         elif not arg:
             self.ffi_value = _lib.ippNew()
