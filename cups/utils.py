@@ -30,3 +30,12 @@ def _bytes_to_value(b: bytes) -> Optional[Any]:
     if string and string.split(",")[0] != "none":
         return string
     return None
+
+
+def _value_to_bytes(value: Any) -> Any:
+    if value is None:
+        return _ffi.NULL
+    if isinstance(value, list):
+        return _ffi.new("char *[]", [_ffi.new("char[]", s.encode()) for s in value])
+    if isinstance(value, str):
+        return _ffi.new("char[]", value.encode())
