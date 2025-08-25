@@ -1,25 +1,81 @@
 from cups import _cups
-from cups.types.cups import cupsDest
-from typing import Any, Dict
+from cups.types.cups import cupsDest, cupsDestInfo
+from cups.types.media import cupsMedia
+from cups.types.ipp import IPPAttribute, IPPRequest, IPPStatus, IPPError
+from cups.enums.cups import CUPSDestFlags
+from cups.enums.media import CUPSMediaFlags
+from cups.enums.ipp import IPPOp, IPPTag
+from typing import Any, Dict, Optional
 from cups.utils import _bytes_to_value
+
+from .base import _Base
 
 _ffi = _cups.ffi
 _lib = _cups.lib
 
 
-class DestsMixin:
+class DestsMixin(_Base):
     http: Any = None
+
+    def addDest(self, name: str, instance: Optional[str] = None) -> Dict[str, cupsDest]:
+        dests = self.getDests()
+        c_name = _ffi.new("char[]", name.encode("utf-8"))
+        c_instance = (
+            _ffi.new("char[]", instance.encode("utf-8")) if instance else _ffi.NULL
+        )
+        c_dests = cupsDest.to_cffi_list(dests)
+        _lib.cupsAddDest(c_name, c_instance, len(dests), c_dests)
+        return cupsDest.from_cffi_list(dests=c_dests)
 
     def getDefault(self) -> str:
         return _bytes_to_value(_lib.cupsGetDefault(self.http))
 
     def getDests(self) -> Dict[str, cupsDest]:
-        dests: cupsDest = cupsDest.cffi_new("**")
+        dests: cupsDest = cupsDest("**")
         count: int = _lib.cupsGetDests(self.http, dests.ffi_value)
 
         return cupsDest.from_cffi_list(dests=dests, count=count)
 
-    def setDests(self, num_dests: int, cups_dests_ffi: Any) -> bool:
+    def setDests(self, dests: list[cupsDest]) -> bool:
         return _bytes_to_value(
-            _lib.cupsSetDests(self.http, _ffi.cast("size_t", num_dests), cups_dests_ffi)
+            _lib.cupsSetDests(self.http, len(dests), cupsDest.to_cffi_list(dests))
         )
+
+    def copyDestInfo(
+        self, dest: cupsDest, flags: CUPSDestFlags = CUPSDestFlags.NONE
+    ) -> cupsDestInfo:
+        return cupsDestInfo(
+            _lib.cupsCopyDestInfo(self.http, dest.ffi_value, flags.value)
+        )
+
+    def checkDestSupported(
+        self,
+        dest: cupsDest,
+        dinfo: cupsDestInfo,
+        option: str,
+        value: Optional[str] = None,
+    ) -> bool:
+        return bool(
+            _bytes_to_value(
+                _lib.cupsCheckDestSupported(
+                    self.http,
+                    dest.ffi_value,
+                    dinfo.ffi_value,
+                    option.encode(),
+                    value.encode() if value else _ffi.NULL,
+                )
+            )
+        )
+
+    def getDestMediaDefault(
+        self,
+        dest: cupsDest,
+        media_flags: CUPSMediaFlags,
+        media: cupsMedia,
+        dest_info_flags: CUPSDestFlags = CUPSDestFlags.NONE,
+    ) -> Optional[str]:
+        result = _lib.cupsGetDestMediaDefault(
+            self.http, dest.ffi_value, dest_info_flags.value
+        )
+
+        return _bytes_to_value(media)
