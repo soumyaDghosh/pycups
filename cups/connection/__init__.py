@@ -9,11 +9,14 @@ from cups.generic import (
     setServer,
     setUser,
 )
-from cups.enums.http import HttpEncryption
+from cups.enums.http import HttpEncryption, HttpStatus
 from typing import Any, Optional
 
 from .dests import DestsMixin
 from .jobs import JobMixin
+from .ipp import IPPMixin
+from .base import _Base
+from cups.utils import _bytes_to_value
 
 import socket
 
@@ -21,7 +24,7 @@ _ffi = _cups.ffi
 _lib = _cups.lib
 
 
-class Connection(DestsMixin, JobMixin):
+class Connection(DestsMixin, JobMixin, IPPMixin, _Base):
     """Connection to the CUPS server."""
 
     http: Any = None
@@ -84,4 +87,16 @@ class Connection(DestsMixin, JobMixin):
         c_encryption = _ffi.cast("http_encryption_t", self.encryption)
         self.http = _lib.httpConnect(
             c_host, c_port, _ffi.NULL, family, c_encryption, True, msec, _ffi.NULL
+        )
+
+    def getPassword(self, prompt: str, method: str, resource: str) -> str:
+        return _bytes_to_value(
+            _lib.cupsGetPassword(
+                prompt.encode(), self.http, method.encode(), resource.encode()
+            )
+        )
+
+    def getFile(self, resource: str, filname: str) -> HttpStatus:
+        return HttpStatus(
+            _lib.cupsGetFile(self.http, resource.encode(), filname.encode())
         )
