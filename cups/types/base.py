@@ -55,11 +55,13 @@ class cupsBaseClass(ABC):
             ctype = _ffi.typeof(ffi_value)
             ctype_name = _ffi.getctype(cls.ffi_name)
 
-            if ctype.kind == "pointer" and ctype.item.cname != ctype_name:
-                return False
-            elif ctype.kind != "pointer":
+            if ctype.kind == "pointer":
+                return ctype.item.cname != ctype_name
+
+            if ctype.kind != "pointer":
                 return ctype.cname == _ffi.getctype(cls.ffi_name)
-            return True
+
+            return False
         except:
             return False
 
