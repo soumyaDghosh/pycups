@@ -1,37 +1,71 @@
 from cups import _cups
-from dataclasses import dataclass, field
 
-from typing import Any, ClassVar, List, Optional, override
+from typing import Any, ClassVar, List, Optional, override, Union
+from abc import ABC, abstractmethod
 
 _ffi = _cups.ffi
 _lib = _cups.lib
 
 
-@dataclass
-class cupsBaseClass:
+class cupsBaseClass(ABC):
     ffi_name: ClassVar[str]
     ffi_free: ClassVar[str]
-    ffi_value: Any = field(repr=False)
+    ffi_value: Any
 
-    def cffi_new(self, extra_args: Optional[str] = None) -> "cupsBaseClass":
-        ffi_struct: str = f"{self.ffi_name} {extra_args}" if extra_args else self.ffi_name
-        self.ffi_value = _ffi.new(ffi_struct)
-        return self
+    def __init__(self, args=None):
+        if args and self._is_valid_ctype(args):
+            self.ffi_value = args
+        else:
+            if isinstance(args, str):
+                self.ffi_value = _ffi.new(f"{self.ffi_name} {args}")
+            else:
+                self.ffi_value = _ffi.new(f"{self.ffi_name} *")
+
+    # def __del__(self, extra_args: Optional[List] = None):
+    #     if self.ffi_free:
+    #         cffi_free = getattr(_lib, self.ffi_free, None)
+    #         if cffi_free is None:
+    #             raise AttributeError(f"C function '{self.ffi_free}' not found in lib")
+    #         try:
+    #             cffi_free(*extra_args) if extra_args else cffi_free()
+    #         except Exception as e:
+    #             raise RuntimeError(f"Failed to call C function '{self.ffi_free}': {e}")
+
+    # @classmethod
+    # def cffi_free(cls, extra_args: Optional[List]):
+    #     if not cls.ffi_free:
+    #         return
+
+    #     cffi_free = getattr(_lib, cls.ffi_free, None)
+    #     if cffi_free is None:
+    #         raise AttributeError(f"C function '{cls.ffi_free}' not found in lib")
+
+    #     try:
+    #         cffi_free(*extra_args) if extra_args else cffi_free()
+    #     except Exception as e:
+    #         raise RuntimeError(f"Failed to call C function '{cls.ffi_free}': {e}")
+
+    @property
+    def valid(self):
+        return self._is_valid_ctype(self.ffi_value)
 
     @classmethod
-    def cffi_free(cls, extra_args: Optional[List]):
-        if not cls.ffi_free:
-            return
-
-        cffi_free = getattr(_lib, cls.ffi_free, None)
-        if cffi_free is None:
-            raise AttributeError(f"C function '{cls.ffi_free}' not found in lib")
-
+    def _is_valid_ctype(cls, ffi_value: Any) -> bool:
         try:
-            cffi_free(*extra_args) if extra_args else cffi_free()
-        except Exception as e:
-            raise RuntimeError(f"Failed to call C function '{cls.ffi_free}': {e}")
+            ctype = _ffi.typeof(ffi_value)
+            ctype_name = _ffi.getctype(cls.ffi_name)
 
-    @override
+            if ctype.kind == "pointer" and ctype.item.cname != ctype_name:
+                return False
+            elif ctype.kind != "pointer":
+                return ctype.cname == _ffi.getctype(cls.ffi_name)
+            return True
+        except:
+            return False
+
+    @abstractmethod
+    def __str__(self):
+        return self.__repr__()
+
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.ffi_value})"
+        return f"{self.__class__.__name__}(ffi_value={self.ffi_value})"

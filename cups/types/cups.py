@@ -1,6 +1,3 @@
-from dataclasses import (
-    dataclass,
-)
 from typing import (
     Any,
     ClassVar,
@@ -12,18 +9,29 @@ from cups.utils import (
     _bytes_to_value,
 )
 
-from .base import cupsBaseClass, _ffi
+from cups.types.ipp import IPPAttribute, IPPRequest
+from cups.enums.ipp import IPPOp, IPPTag
+
+from .base import cupsBaseClass, _ffi, _lib
 
 
-@dataclass(repr=False)
+class cupsDestInfo(cupsBaseClass):
+    """A class representing a CUPS destination info"""
+
+    ffi_name: ClassVar[str] = "cups_dinfo_t"
+
+    def __str__(self):
+        return super().__str__()
+
+
 class cupsOption(cupsBaseClass):
     @property
     def name(self) -> str:
-        return _bytes_to_value(self.ffi_value[0].name)
+        return _bytes_to_value(self.ffi_value.name)
 
     @property
     def value(self) -> Optional[Any]:
-        return _bytes_to_value(self.ffi_value[0].value)
+        return _bytes_to_value(self.ffi_value.value)
 
     ffi_name = "cups_option_t"
 
@@ -41,9 +49,7 @@ class cupsOption(cupsBaseClass):
         Returns:
             cupsOption: The equivalent Python object.
         """
-        return cls(
-            ffi_value=_ffi.addressof(opt),
-        )
+        return cls(opt)
 
     @classmethod
     def to_cffi_list(cls, opts: "Dict[str, cupsOption]") -> Any:
@@ -79,26 +85,28 @@ class cupsOption(cupsBaseClass):
 
         return results
 
+    def __str__(self):
+        return f"{self.name}: {self.value})"
 
-@dataclass(repr=False)
+
 class cupsDest(cupsBaseClass):
     @property
     def name(self) -> str:
-        return str(_bytes_to_value(self.ffi_value[0].name))
+        return str(_bytes_to_value(self.ffi_value.name))
 
     @property
     def instance(self) -> Optional[str]:
-        return _bytes_to_value(self.ffi_value[0].instance)
+        return _bytes_to_value(self.ffi_value.instance)
 
     @property
     def options(self) -> Dict[str, cupsOption]:
         return cupsOption.from_cffi_list(
-            opts=self.ffi_value[0].options, count=self.ffi_value[0].num_options
+            opts=self.ffi_value.options, count=self.ffi_value.num_options
         )
 
     @property
     def is_default(self) -> bool:
-        return self.ffi_value[0].is_default
+        return self.ffi_value.is_default
 
     ffi_name = "cups_dest_t"
     ffi_free = "cupsFreeDests"
@@ -134,7 +142,7 @@ class cupsDest(cupsBaseClass):
         Returns:
             cupsDest: The equivalent Python object.
         """
-        return cls(ffi_value=_ffi.addressof(dest))
+        return cls(dest)
 
     @classmethod
     def to_cffi_list(cls, dests: "Dict[str, cupsDest]") -> Any:
@@ -153,60 +161,82 @@ class cupsDest(cupsBaseClass):
 
         return c_dests
 
+    def getPrinterAttributes(self, http: Any) -> dict[str, IPPAttribute]:
+        ctype = _ffi.typeof(http)
+        if ctype.kind != "pointer" and ctype.cname != "struct _http_s *":
+            raise TypeError("http must be of type struct _http_s *")
 
-@dataclass(repr=False)
+        req: IPPRequest = IPPRequest(IPPOp.GET_PRINTER_ATTRIBUTES)
+        req.addString(
+            group=IPPTag.OPERATION,
+            value_tag=IPPTag.URI,
+            name="printer-uri",
+            value=self.options["printer-uri-supported"].value,
+        )
+        res: IPPRequest = IPPRequest(_lib.cupsDoRequest(http, req.ffi_value, b"/"))
+        if res is not None:
+            return {
+                attr.name: attr
+                for attr in res.attributes
+                if isinstance(attr, IPPAttribute)
+            }
+
+    def __str__(self):
+        return f"{self.name} (Default)" if self.is_default else self.name
+
+
 class cupsJob(cupsBaseClass):
     ffi_name: ClassVar[str] = "cups_job_t"
     ffi_free: ClassVar[str] = "cupsFreeJobs"
 
     @property
     def id(self) -> int:
-        return self.ffi_value[0].id
+        return self.ffi_value.id
 
     @property
     def dest(self) -> str:
-        return str(_bytes_to_value(self.ffi_value[0].dest))
+        return str(_bytes_to_value(self.ffi_value.dest))
 
     @property
     def title(self) -> Optional[str]:
-        return _bytes_to_value(self.ffi_value[0].title)
+        return _bytes_to_value(self.ffi_value.title)
 
     @property
     def user(self) -> Optional[str]:
-        return _bytes_to_value(self.ffi_value[0].user)
+        return _bytes_to_value(self.ffi_value.user)
 
     @property
     def format(self) -> Optional[str]:
-        return _bytes_to_value(self.ffi_value[0].format)
+        return _bytes_to_value(self.ffi_value.format)
 
     @property
     def state(self) -> int:
-        return self.ffi_value[0].state
+        return self.ffi_value.state
 
     @property
     def size(self) -> int:
-        return self.ffi_value[0].size
+        return self.ffi_value.size
 
     @property
     def priority(self) -> int:
-        return self.ffi_value[0].priority
+        return self.ffi_value.priority
 
     @property
     def completed_time(self) -> int:
-        return self.ffi_value[0].completed_time
+        return self.ffi_value.completed_time
 
     @property
     def creation_time(self) -> int:
-        return self.ffi_value[0].creation_time
+        return self.ffi_value.creation_time
 
     @property
     def processing_time(self) -> int:
-        return self.ffi_value[0].processing_time
+        return self.ffi_value.processing_time
 
     @classmethod
     def from_cffi(cls, job: Any) -> "cupsJob":
         """Wrap a single cups_job_t struct in a cupsJob instance."""
-        return cls(ffi_value=_ffi.addressof(job))
+        return cls(job)
 
     @classmethod
     def from_cffi_list(cls, jobs: Any, count: int) -> Dict[int, "cupsJob"]:
@@ -238,3 +268,6 @@ class cupsJob(cupsBaseClass):
         c_job[0].creation_time = self.creation_time
         c_job[0].processing_time = self.processing_time
         return c_job
+
+    def __str__(self):
+        return super.__str__()

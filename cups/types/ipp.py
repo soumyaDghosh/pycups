@@ -1,13 +1,12 @@
 from .base import cupsBaseClass, _lib, _ffi
 from cups.utils import _bytes_to_value
-from typing import Any, ClassVar, override
+from typing import Any, ClassVar, override, Optional, Union
 from dataclasses import dataclass, field
 from cups.enums.ipp import IPPRes, IPPState, IPPStatus, IPPTag, IPPOp
 from datetime import datetime
 import struct
 
 
-@dataclass
 class IPPAttribute(cupsBaseClass):
     ffi_name: ClassVar[str] = "ipp_attribute_t"
     """
@@ -46,7 +45,14 @@ class IPPAttribute(cupsBaseClass):
             IPPTag.ADMINDEFINE,
         ]:
             return []
-        if self.value_tag in [IPPTag.INTEGER, IPPTag.ENUM, IPPTag.RANGE]:
+        if self.value_tag == IPPTag.RANGE:
+            ranges = []
+            for i in range(self.count):
+                upper = _ffi.new("int *")
+                lower = _lib.ippGetRange(self.ffi_value, i, upper)
+                ranges.append(range(lower, upper[0]))
+            return ranges
+        if self.value_tag in [IPPTag.INTEGER, IPPTag.ENUM]:
             return [_lib.ippGetInteger(self.ffi_value, i) for i in range(self.count)]
         elif self.value_tag in [
             IPPTag.TEXT,
@@ -77,19 +83,38 @@ class IPPAttribute(cupsBaseClass):
                 _lib.ippGetResolution(self.ffi_value, i, res, unit)
                 resolutions.append((res[0], IPPRes(unit[0])))
             return resolutions
+        elif self.value_tag == IPPTag.BEGIN_COLLECTION:
+            collections = []
+            for i in range(self.count):
+                attr = IPPRequest(_lib.ippGetCollection(self.ffi_value, i))
+                collections.append(attr)
+            return collections
         else:
             return []
 
+    def __str__(self):
+        required_size = _lib.ippAttributeString(self.ffi_value, _ffi.NULL, 0) + 1
+        buffer = _ffi.new("char[]", required_size)
+        _lib.ippAttributeString(self.ffi_value, buffer, required_size)
+        return str(_bytes_to_value(buffer))
 
-@dataclass
+
 class IPPRequest(cupsBaseClass):
     ffi_name: ClassVar[str] = "ipp_t"
 
-    @override
-    @classmethod
-    def cffi_new(cls, op: IPPOp) -> "IPPRequest":
-        cls.ffi_value = _lib.ippNewRequest(op)
-        return cls(ffi_value=cls.ffi_value)
+    def __init__(self, arg: Optional[Union[IPPOp, Any]] = None):
+        if isinstance(arg, IPPOp):
+            self.ffi_value = _lib.ippNewRequest(arg)
+
+        elif arg and self._is_valid_ctype(arg):
+            self.ffi_value = arg
+            return None
+
+        elif not arg:
+            self.ffi_value = _lib.ippNew()
+
+        else:
+            raise ValueError("Invalid arguments passed")
 
     @property
     def attributes(self) -> list[IPPAttribute]:
@@ -111,6 +136,19 @@ class IPPRequest(cupsBaseClass):
     @property
     def statuscode(self) -> IPPStatus:
         return IPPStatus(_lib.ippGetStatusCode(self.ffi_value))
+
+    @property
+    def request_id(self) -> int:
+        return _lib.ippGetRequestId(self.ffi_value)
+
+    @property
+    def version(self) -> float:
+        minor = _ffi.new("int *")
+        major = _lib.ippGetVersion(self.ffi_value, minor)
+        return float(f"{major}.{minor[0]}")
+
+    def __len__(self) -> int:
+        return _lib.ippGetLength(self.ffi_value)
 
     def addString(
         self,
@@ -135,6 +173,54 @@ class IPPRequest(cupsBaseClass):
                 value.encode(),
             )
         )
+
+    def addStrings(
+        self,
+        group: IPPTag,
+        value_tag: IPPTag,
+        name: str,
+        values: list[str],
+        language: str = None,
+    ):
+        if group is None or value_tag is None or name is None or values is None:
+            raise RuntimeError("Invalid parameters passed")
+
+        language = _ffi.NULL if language is None else language.encode()
+
+        c_array = _ffi.new("char *[]", len(values))
+        for i, value in enumerate(values):
+            c_array[i] = _ffi.new("char[]", value.encode())
+
+        return IPPAttribute(
+            _lib.ippAddStrings(
+                self.ffi_value,
+                group,
+                value_tag,
+                name.encode(),
+                len(values),
+                language,
+                c_array,
+            )
+        )
+
+    def setString(
+        self,
+        attr: IPPAttribute,
+        position: int,
+        value: str,
+    ):
+        if attr is None or position < 0 or value is None:
+            raise RuntimeError("Invalid parameters passed")
+
+        return IPPAttribute(
+            _lib.ippSetString(self.ffi_value, attr.ffi_value, position, value.encode())
+        )
+
+    def __str__(self):
+        return f"{self.__class__.__name__}(state={self.state})"
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}(state={self.state}, statuscode={self.statuscode}, version={self.version})"
 
 
 @dataclass
