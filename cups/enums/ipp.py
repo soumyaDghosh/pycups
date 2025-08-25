@@ -1,5 +1,6 @@
 from enum import IntFlag
 from cups import _cups
+from cups.utils import _bytes_to_value
 
 _lib = _cups.lib
 
@@ -130,6 +131,16 @@ class IPPOp(IntFlag):
     UPDATE_OUTPUT_DEVICE_ATTRIBUTES = _lib.IPP_OP_UPDATE_OUTPUT_DEVICE_ATTRIBUTES
     VALIDATE_DOCUMENT = _lib.IPP_OP_VALIDATE_DOCUMENT
     VALIDATE_JOB = _lib.IPP_OP_VALIDATE_JOB
+
+    def __str__(self):
+        return _bytes_to_value(_lib.ippOpString(self.value))
+
+    @classmethod
+    def _missing_(cls, value):
+        if isinstance(value, str):
+            op = _lib.ippOpValue(value.encode())
+            return cls(op)
+        return None
 
 
 class IPPTag(IntFlag):
