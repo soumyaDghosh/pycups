@@ -50,13 +50,21 @@ class cupsBaseClass(ABC):
         return self._is_valid_ctype(self.ffi_value)
 
     @classmethod
+    def _is_valid_c_list(cls, ffi_value: Any) -> bool:
+        try:
+            ctype = _ffi.typeof(ffi_value)
+            return ctype.item.kind == "pointer"
+        except:
+            return False
+
+    @classmethod
     def _is_valid_ctype(cls, ffi_value: Any) -> bool:
         try:
             ctype = _ffi.typeof(ffi_value)
             ctype_name = _ffi.getctype(cls.ffi_name)
 
             if ctype.kind == "pointer":
-                return ctype.item.cname != ctype_name
+                return ctype.item.cname == ctype_name
 
             if ctype.kind != "pointer":
                 return ctype.cname == _ffi.getctype(cls.ffi_name)
