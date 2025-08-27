@@ -10,10 +10,9 @@ import struct
 class IPPAttribute(cupsBaseClass):
     ffi_name: ClassVar[str] = "ipp_attribute_t"
     """
-    From the docs
     https://openprinting.github.io/cups/libcups/cupspm.html#ippDeleteAttribute
-    Delete a single attribute in an IPP message.
-    There is no way to actually delete a single attribute.
+    The doc says: "Delete a single attribute in an IPP message."
+    Note: There is no way to actually delete a single attribute.
     """
     ffi_free: ClassVar[str] = "ippDeleteAttributes"
 
