@@ -66,16 +66,3 @@ class DestsMixin(_Base):
                 )
             )
         )
-
-    def getDestMediaDefault(
-        self,
-        dest: cupsDest,
-        media_flags: CUPSMediaFlags,
-        media: cupsMedia,
-        dest_info_flags: CUPSDestFlags = CUPSDestFlags.NONE,
-    ) -> Optional[str]:
-        result = _lib.cupsGetDestMediaDefault(
-            self.http, dest.ffi_value, dest_info_flags.value
-        )
-
-        return _bytes_to_value(media)
