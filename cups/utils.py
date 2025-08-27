@@ -20,7 +20,7 @@ def _strtobool(val: str) -> Optional[bool]:
         return None
 
 
-def _bytes_to_value(b: bytes) -> Optional[Any]:
+def _bytes_to_value(b: bytes) -> Optional[Union[str, bool]]:
     if b == _ffi.NULL:
         return None
     string: str = _ffi.string(b).decode()
