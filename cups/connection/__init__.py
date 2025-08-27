@@ -27,7 +27,7 @@ _lib = _cups.lib
 class Connection(DestsMixin, JobMixin, IPPMixin, _Base):
     """Connection to the CUPS server."""
 
-    http: Any = None
+    http: Any
     __module__: str = "cups"
 
     @property

@@ -15,7 +15,7 @@ _lib = _cups.lib
 
 
 class DestsMixin(_Base):
-    http: Any = None
+    http: Any
 
     def addDest(self, name: str, instance: Optional[str] = None) -> Dict[str, cupsDest]:
         dests = self.getDests()

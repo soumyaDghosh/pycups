@@ -8,7 +8,7 @@ _lib = _cups.lib
 
 
 class DocumentMixin(_Base):
-    http: Any = None
+    http: Any
 
     def startDestDocument(
         self,
