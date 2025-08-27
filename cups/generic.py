@@ -18,6 +18,7 @@ def areCredentialsValidForName(common_name: str, credentials: str) -> bool:
 def copyCredentialsKey(
     path: Path,
     common_name: str,
+    *,
     is_key: bool = False,
     is_public_key: bool = False,
     copy_req: bool = False,
