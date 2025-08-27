@@ -24,8 +24,8 @@ class DestsMixin(_Base):
             _ffi.new("char[]", instance.encode("utf-8")) if instance else _ffi.NULL
         )
         c_dests = cupsDest.to_cffi_list(dests)
-        _lib.cupsAddDest(c_name, c_instance, len(dests), c_dests)
-        return cupsDest.from_cffi_list(dests=c_dests)
+        count = _lib.cupsAddDest(c_name, c_instance, len(dests), c_dests)
+        return cupsDest.from_cffi_list(dests=c_dests, count=count)
 
     def getDefault(self) -> str:
         return _bytes_to_value(_lib.cupsGetDefault(self.http))
