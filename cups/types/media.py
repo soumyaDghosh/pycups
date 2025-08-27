@@ -1,4 +1,4 @@
-from .base import cupsBaseClass, _lib, _ffi
+from .base import cupsBaseClass
 from cups.utils import _bytes_to_value
 
 
