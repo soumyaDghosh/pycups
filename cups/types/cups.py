@@ -56,7 +56,7 @@ class cupsOption(cupsBaseClass):
         count = len(opts)
         c_opts = _ffi.new(f"cups_option_t[{count}]")
 
-        for i, (_, opt) in enumerate(opts.items()):
+        for i, opt in enumerate(opts.values()):
             c_opts[i].name = _ffi.new("char[]", opt.name.encode("utf-8"))
             c_opts[i].value = _ffi.new(
                 "char[]",
@@ -117,10 +117,11 @@ class cupsDest(cupsBaseClass):
         Convert a list of CFFI dest structs to a list of python cupsDest.
 
         Args:
-            dests (Any): The CFFI *cups_dest_t pointer.
+            dests (Any): The CFFI *cups_dest_t pointer to a pointer.
+            count (int): The number of destinations in the list.
 
         Returns:
-            List[cupsDest]: The list of cupsDest.
+            Dict[str, cupsDest]: The list of cupsDest.
         """
         results: Dict[str, cupsDest] = {}
         for i in range(count):
@@ -149,7 +150,7 @@ class cupsDest(cupsBaseClass):
         count = len(dests)
         c_dests = _ffi.new(f"cups_dest_t[{count}]")
 
-        for i, (_, dest) in enumerate(dests.items()):
+        for i, dest in enumerate(dests.values()):
             c_dests[i].name = _ffi.new("char[]", dest.name.encode("utf-8"))
             c_dests[i].instance = _ffi.new(
                 "char[]",
