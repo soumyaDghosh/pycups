@@ -1,7 +1,7 @@
 from cups import _cups
 
-from typing import Any, ClassVar, List, Optional, override, Union
-from abc import ABC, abstractmethod
+from typing import Any, ClassVar
+from abc import ABC
 
 _ffi = _cups.ffi
 _lib = _cups.lib
@@ -70,7 +70,6 @@ class cupsBaseClass(ABC):
         except:
             return False
 
-    @abstractmethod
     def __str__(self):
         return self.__repr__()
 

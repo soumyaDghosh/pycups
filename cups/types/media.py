@@ -44,6 +44,3 @@ class cupsMedia(cupsBaseClass):
     @property
     def type(self) -> str:
         return _bytes_to_value(self.ffi_value.type)
-
-    def __str__(self):
-        return super().__str__()

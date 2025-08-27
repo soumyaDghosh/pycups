@@ -20,9 +20,6 @@ class cupsDestInfo(cupsBaseClass):
 
     ffi_name: ClassVar[str] = "cups_dinfo_t"
 
-    def __str__(self):
-        return super().__str__()
-
 
 class cupsOption(cupsBaseClass):
     @property
@@ -269,6 +266,3 @@ class cupsJob(cupsBaseClass):
         c_job[0].creation_time = self.creation_time
         c_job[0].processing_time = self.processing_time
         return c_job
-
-    def __str__(self):
-        return super.__str__()
