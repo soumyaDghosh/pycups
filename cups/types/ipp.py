@@ -154,7 +154,7 @@ class IPPRequest(cupsBaseClass):
         value_tag: IPPTag,
         name: str,
         value: str,
-        language: str = None,
+        language: Optional[str] = None,
     ) -> IPPAttribute:
         if group is None or value_tag is None or name is None or value is None:
             raise RuntimeError("Invalid parameters passed")
@@ -178,7 +178,7 @@ class IPPRequest(cupsBaseClass):
         value_tag: IPPTag,
         name: str,
         values: list[str],
-        language: str = None,
+        language: Optional[str] = None,
     ):
         if group is None or value_tag is None or name is None or values is None:
             raise RuntimeError("Invalid parameters passed")
