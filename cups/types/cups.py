@@ -35,18 +35,18 @@ class cupsOption(cupsBaseClass):
     def to_dict(self) -> dict:
         return {"name": self.name, "value": self.value}
 
-    @classmethod
-    def from_cffi(cls, opt: Any) -> "cupsOption":
-        """
-        Convert a single CFFI dest struct to a Python cupsOption object.
-
+    def toAttribute(self, ipp_req: IPPRequest, group_tag: IPPTag) -> IPPAttribute:
+        """Convert this cupsOption into an IPPAttribute.
         Args:
-            dest (Any): The CFFI cups_option_t struct.
+            ipp_req (IPPRequest): The IPPRequest to add the attribute to.
+            group_tag (IPPTag): The group tag to use for the attribute.
 
         Returns:
-            cupsOption: The equivalent Python object.
+            IPPAttribute: The created IPPAttribute.
         """
-        return cls(opt)
+
+        return IPPAttribute(_lib.cupsEncodeOption(ipp_req.ffi_value, group_tag, self.name.encode(), self.value.encode() if self.value else b""))
+
 
     @classmethod
     def to_cffi_list(cls, opts: "Dict[str, cupsOption]") -> Any:
@@ -157,7 +157,9 @@ class cupsDest(cupsBaseClass):
             c_dests[i].num_options = len(dest.options)
             c_dests[i].options = cupsOption.to_cffi_list(dest.options)
 
-        return c_dests
+        if cls._is_valid_c_list(c_dests):
+            return c_dests
+        return None
 
     def getPrinterAttributes(self, http: Any) -> dict[str, IPPAttribute]:
         ctype = _ffi.typeof(http)
@@ -266,3 +268,9 @@ class cupsJob(cupsBaseClass):
         c_job[0].creation_time = self.creation_time
         c_job[0].processing_time = self.processing_time
         return c_job
+
+class cupsLang(cupsBaseClass):
+    ffi_name = "cups_lang_t"
+
+    def __str__(self):
+        return _bytes_to_value(_lib.cupsLangGetName(self.ffi_value))
