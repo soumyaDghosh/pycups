@@ -14,7 +14,6 @@ from typing import Any, Optional
 
 from .dests import DestsMixin
 from .jobs import JobMixin
-from .ipp import IPPMixin
 from .base import _Base
 from cups.utils import _bytes_to_value
 
@@ -24,7 +23,7 @@ _ffi = _cups.ffi
 _lib = _cups.lib
 
 
-class Connection(DestsMixin, JobMixin, IPPMixin, _Base):
+class Connection(DestsMixin, JobMixin, _Base):
     """Connection to the CUPS server."""
 
     http: Any
@@ -88,6 +87,12 @@ class Connection(DestsMixin, JobMixin, IPPMixin, _Base):
         self.http = _lib.httpConnect(
             c_host, c_port, _ffi.NULL, family, c_encryption, True, msec, _ffi.NULL
         )
+
+    def connectAgain(self, msec: int) -> bool:
+        return bool(_lib.httpConnectAgain(self.http, msec, _ffi.NULL))
+
+    def doAuthentication(self, method: str, resource: str) -> bool:
+        return bool(_lib.cupsDoAuthentication(self.http, method.encode(), resource.encode()))
 
     def getPassword(self, prompt: str, method: str, resource: str) -> str:
         return _bytes_to_value(
