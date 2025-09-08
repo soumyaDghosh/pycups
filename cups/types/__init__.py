@@ -1,4 +1,4 @@
-from .cups import cupsDest, cupsJob, cupsOption
+from .cups import cupsDest, cupsDestInfo, cupsJob, cupsOption, cupsLang
 from .ipp import IPPAttribute, IPPRequest
 
 __all__ = [
