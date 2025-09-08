@@ -7,3 +7,6 @@ cups/internal
 
 .envrc
 *.so
+*.c
+*.bak
+*.txt
