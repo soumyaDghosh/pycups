@@ -9,7 +9,7 @@ from cups.generic import (
     setServer,
     setUser,
 )
-from cups.enums.http import HttpEncryption, HttpStatus
+from cups.enums.http import HttpEncryption, HttpStatus, HttpState
 from typing import Any, Optional
 
 from .dests import DestsMixin
@@ -63,6 +63,10 @@ class Connection(DestsMixin, JobMixin, _Base):
     @user.setter
     def user(self, user: str):
         setUser(user)
+
+    @property
+    def state(self) -> HttpState:
+        return HttpState(_lib.httpGetState(self.http))
 
     def __init__(
         self,
