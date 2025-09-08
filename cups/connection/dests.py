@@ -27,6 +27,28 @@ class DestsMixin(_Base):
         count = _lib.cupsAddDest(c_name, c_instance, len(dests), c_dests)
         return cupsDest.from_cffi_list(dests=c_dests, count=count)
 
+    def findDestDefault(self, dest: cupsDest, dinfo: cupsDestInfo, option: str) -> IPPAttribute:
+        return IPPAttribute(
+            _lib.cupsFindDestDefault(
+                self.http, dest.ffi_value, dinfo.ffi_value, option.encode()
+            )
+        )
+
+    def findDestReady(self, dest: cupsDest, dinfo: cupsDestInfo, option: str) -> IPPAttribute:
+        return IPPAttribute(
+            _lib.cupsFindDestReady(
+                self.http, dest.ffi_value, dinfo.ffi_value, option.encode()
+            )
+        )
+
+    def findDestSupported(self, dest: cupsDest, dinfo: cupsDestInfo, option: str) -> IPPAttribute:
+        return IPPAttribute(
+            _lib.cupsFindDestSupported(
+                self.http, dest.ffi_value, dinfo.ffi_value, option.encode()
+            )
+        )
+
+
     def getDefault(self) -> str:
         return _bytes_to_value(_lib.cupsGetDefault(self.http))
 
