@@ -1,8 +1,10 @@
 from enum import IntFlag
+
 from cups import _cups
 from cups.utils import _bytes_to_value
 
 _lib = _cups.lib
+
 
 class CUPSEncoding(IntFlag):
     BG18030 = _lib.CUPS_ENCODING_BG18030
@@ -47,7 +49,7 @@ class CUPSEncoding(IntFlag):
     WINDOWS_949 = _lib.CUPS_ENCODING_WINDOWS_949
     WINDOWS_950 = _lib.CUPS_ENCODING_WINDOWS_950
 
-    def __str__(self):
+    def __str__(self) -> str:
         return _bytes_to_value(_lib.cupsEncodingString(self.value))
 
     @classmethod

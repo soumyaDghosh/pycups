@@ -1,6 +1,7 @@
-from cffi import FFI
 import os
+
 import pkgconfig
+from cffi import FFI
 
 LIBRARY = "cups3"
 VERSION = "3.0rc4"

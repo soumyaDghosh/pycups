@@ -1,11 +1,8 @@
+from typing import Any, Optional
+
 from cups import _cups
-from cups.types.cups import cupsDest, cupsDestInfo
-from cups.types.media import cupsMedia
-from cups.types.ipp import IPPAttribute, IPPRequest, IPPStatus, IPPError
 from cups.enums.cups import CUPSDestFlags
-from cups.enums.media import CUPSMediaFlags
-from cups.enums.ipp import IPPOp, IPPTag
-from typing import Any, Dict, Optional
+from cups.types.cups import cupsDest, cupsDestInfo
 from cups.utils import _bytes_to_value
 
 from .base import _Base
@@ -17,7 +14,7 @@ _lib = _cups.lib
 class DestsMixin(_Base):
     http: Any
 
-    def addDest(self, name: str, instance: Optional[str] = None) -> Dict[str, cupsDest]:
+    def addDest(self, name: str, instance: Optional[str] = None) -> dict[str, cupsDest]:
         dests = self.getDests()
         c_name = _ffi.new("char[]", name.encode("utf-8"))
         c_instance = (
@@ -30,7 +27,7 @@ class DestsMixin(_Base):
     def getDefault(self) -> str:
         return _bytes_to_value(_lib.cupsGetDefault(self.http))
 
-    def getDests(self) -> Dict[str, cupsDest]:
+    def getDests(self) -> dict[str, cupsDest]:
         dests: cupsDest = cupsDest("**")
         count: int = _lib.cupsGetDests(self.http, dests.ffi_value)
 

@@ -1,3 +1,4 @@
+from ._cups import ffi, lib
 from .connection import (
     Connection,
 )
@@ -7,20 +8,18 @@ from .generic import (
     copyDest,
     getDestWithURI,
     getEncryption,
-    setEncryption,
     getError,
     getPort,
-    setPort,
     getServer,
-    setServer,
     getUser,
-    setUser,
     getUserAgent,
-    setUserAgent,
     setDefaultDest,
+    setEncryption,
+    setPort,
+    setServer,
+    setUser,
+    setUserAgent,
 )
-
-from ._cups import lib, ffi
 
 del connection  # noqa
 del generic  # noqa

@@ -1,5 +1,6 @@
-from .base import cupsBaseClass
 from cups.utils import _bytes_to_value
+
+from .base import cupsBaseClass
 
 
 class cupsMedia(cupsBaseClass):

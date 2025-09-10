@@ -1,10 +1,12 @@
-from .base import cupsBaseClass, _lib, _ffi
-from cups.utils import _bytes_to_value
-from typing import Any, ClassVar, override, Optional, Union
-from dataclasses import dataclass, field
-from cups.enums.ipp import IPPRes, IPPState, IPPStatus, IPPTag, IPPOp
-from datetime import datetime
 import struct
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import Any, ClassVar, Optional, Union, override
+
+from cups.enums.ipp import IPPOp, IPPRes, IPPState, IPPStatus, IPPTag
+from cups.utils import _bytes_to_value
+
+from .base import _ffi, _lib, cupsBaseClass
 
 
 class IPPAttribute(cupsBaseClass):
@@ -53,7 +55,7 @@ class IPPAttribute(cupsBaseClass):
             return ranges
         if self.value_tag in [IPPTag.INTEGER, IPPTag.ENUM]:
             return [_lib.ippGetInteger(self.ffi_value, i) for i in range(self.count)]
-        elif self.value_tag in [
+        if self.value_tag in [
             IPPTag.TEXT,
             IPPTag.NAME,
             IPPTag.KEYWORD,
@@ -66,15 +68,15 @@ class IPPAttribute(cupsBaseClass):
                 _bytes_to_value(_lib.ippGetString(self.ffi_value, i, _ffi.NULL))
                 for i in range(self.count)
             ]
-        elif self.value_tag == IPPTag.BOOLEAN:
+        if self.value_tag == IPPTag.BOOLEAN:
             return [_lib.ippGetBoolean(self.ffi_value, i) for i in range(self.count)]
-        elif self.value_tag == IPPTag.DATE:
+        if self.value_tag == IPPTag.DATE:
             dates: list[datetime] = []
             for i in range(self.count):
                 date_hex_bytes: bytes = _ffi.string(_lib.ippGetDate(self.ffi_value, i))
                 dates.append(datetime(*struct.unpack(">H5B", date_hex_bytes)))
             return dates
-        elif self.value_tag == IPPTag.RESOLUTION:
+        if self.value_tag == IPPTag.RESOLUTION:
             resolutions = []
             for i in range(self.count):
                 unit = _ffi.new("ipp_res_t *")
@@ -82,16 +84,15 @@ class IPPAttribute(cupsBaseClass):
                 _lib.ippGetResolution(self.ffi_value, i, res, unit)
                 resolutions.append((res[0], IPPRes(unit[0])))
             return resolutions
-        elif self.value_tag == IPPTag.BEGIN_COLLECTION:
+        if self.value_tag == IPPTag.BEGIN_COLLECTION:
             collections = []
             for i in range(self.count):
                 attr = IPPRequest(_lib.ippGetCollection(self.ffi_value, i))
                 collections.append(attr)
             return collections
-        else:
-            return []
+        return []
 
-    def __str__(self):
+    def __str__(self) -> str:
         required_size = _lib.ippAttributeString(self.ffi_value, _ffi.NULL, 0) + 1
         buffer = _ffi.new("char[]", required_size)
         _lib.ippAttributeString(self.ffi_value, buffer, required_size)
@@ -101,7 +102,7 @@ class IPPAttribute(cupsBaseClass):
 class IPPRequest(cupsBaseClass):
     ffi_name: ClassVar[str] = "ipp_t"
 
-    def __init__(self, arg: Optional[Union[IPPOp, Any]] = None):
+    def __init__(self, arg: Optional[Union[IPPOp, Any]] = None) -> None:
         if isinstance(arg, IPPOp):
             self.ffi_value = _lib.ippNewRequest(arg)
 
@@ -214,18 +215,16 @@ class IPPRequest(cupsBaseClass):
             _lib.ippSetString(self.ffi_value, attr.ffi_value, position, value.encode())
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.__class__.__name__}(state={self.state})"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.__class__.__name__}(state={self.state}, statuscode={self.statuscode}, version={self.version})"
 
 
 @dataclass
 class IPPError(Exception):
-    """
-    Exception for IPP/CUPS request errors.
-    """
+    """Exception for IPP/CUPS request errors."""
 
     _response: IPPRequest = field(repr=False)
 
@@ -238,5 +237,5 @@ class IPPError(Exception):
         return _bytes_to_value(_lib.ippGetErrorString(self.status))
 
     @override
-    def __str__(self):
+    def __str__(self) -> str:
         return f"IPP Error {self.status.value} ({self.status.name}): {self.message}"

@@ -1,4 +1,5 @@
 from enum import IntFlag
+
 from cups import _cups
 from cups.utils import _bytes_to_value
 
@@ -132,7 +133,7 @@ class IPPOp(IntFlag):
     VALIDATE_DOCUMENT = _lib.IPP_OP_VALIDATE_DOCUMENT
     VALIDATE_JOB = _lib.IPP_OP_VALIDATE_JOB
 
-    def __str__(self):
+    def __str__(self) -> str:
         return _bytes_to_value(_lib.ippOpString(self.value))
 
     @classmethod

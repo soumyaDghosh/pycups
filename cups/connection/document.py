@@ -1,8 +1,10 @@
-from cups.types.cups import cupsDest, cupsDestInfo, cupsOption
+from typing import Any
+
 from cups.enums.http import HttpStatus
 from cups.enums.ipp import IPPStatus
+from cups.types.cups import cupsDest, cupsDestInfo, cupsOption
+
 from .base import _Base, _cups
-from typing import Any, Dict
 
 _lib = _cups.lib
 
@@ -17,7 +19,7 @@ class DocumentMixin(_Base):
         job_id: int,
         docname: str,
         format: str,
-        options: Dict[str, cupsOption],
+        options: dict[str, cupsOption],
         last_document: bool,
     ) -> HttpStatus:
         status = _lib.cupsStartDestDocument(
