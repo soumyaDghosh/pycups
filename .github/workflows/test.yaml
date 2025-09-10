@@ -1,0 +1,21 @@
+name: test
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup environment
+        run: |
+          make setup
+
+      - name: Run linters
+        run: |
+          make lint

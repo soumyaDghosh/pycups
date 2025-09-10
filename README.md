@@ -6,6 +6,20 @@ Then, install this from source using the command
 
 `pip install -e .`
 
+### Developing
+
+Set up a virtual environment and install dependencies with:
+
+```bash
+make setup
+```
+
+See all Make targets with:
+
+```bash
+make help
+```
+
 ### Testing
 
 To test this, run the [`test/test.py`](test/test.py) file. We cannot test `addDests` and `setDests` without doing destructive changes in the system, so they're not yet added in the test. This is a proof-of-concept test. So, please run it with caution.
