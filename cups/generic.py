@@ -1,5 +1,5 @@
 from pathlib import Path  # noqa: D100
-from typing import Optional
+from typing import Optional, Union
 
 from cups import _cups
 from cups.enums.http import HttpEncryption
@@ -23,7 +23,7 @@ def copyCredentialsKey(  # noqa: D103, N802
     is_key: bool = False,
     is_public_key: bool = False,
     copy_req: bool = False,
-) -> str:
+) -> str | bool | None:
     if (is_key and copy_req) or (is_public_key and copy_req):
         raise ValueError(  # noqa: TRY003
             "Cannot copy the key and the credentials request at the same time"
@@ -54,7 +54,7 @@ def copyDest(dest: cupsDest, dests: dict[str, cupsDest]) -> dict[str, cupsDest]:
     num_dests = _lib.cupsCopyDest(
         dest.ffi_value, len(dests), cupsDest.to_cffi_list(dests)
     )
-    return cupsDest.from_cffi_list(dests=dests, count=num_dests)
+    return cupsDest.from_cffi_list(dests=dests, count=num_dests)  # type: ignore[arg-type]
 
 
 def getEncryption() -> HttpEncryption:  # noqa: D103, N802
@@ -75,7 +75,7 @@ def setPort(port: int) -> None:  # noqa: D103, N802
     _lib.ippSetPort(port)
 
 
-def getServer() -> str:  # noqa: D103, N802
+def getServer() -> Optional[Union[str, bool]]:  # noqa: D103, N802
     return _bytes_to_value(_lib.cupsGetServer())
 
 
@@ -84,7 +84,7 @@ def setServer(server: str) -> None:  # noqa: D103, N802
     _lib.cupsSetServer(c_server)
 
 
-def getUser() -> str:  # noqa: D103, N802
+def getUser() -> Optional[Union[str, bool]]:  # noqa: D103, N802
     return _bytes_to_value(_lib.cupsGetUser())
 
 
@@ -99,7 +99,7 @@ def setDefaultDest(name: str, instance: str, num_dests: int, dest: cupsDest) -> 
     _lib.cupsSetDefaultDest(c_name, c_instance, num_dests, dest.ffi_value)
 
 
-def getUserAgent() -> str:  # noqa: D103, N802
+def getUserAgent() -> Optional[Union[str, bool]]:  # noqa: D103, N802
     return _bytes_to_value(_lib.cupsGetUserAgent())
 
 
@@ -114,11 +114,11 @@ def getDestWithURI(uri: str, name: Optional[str] = None) -> cupsDest:  # noqa: D
     dest = _lib.cupsGetDestWithURI(c_name, c_uri)
     if dest == _ffi.NULL:
         raise RuntimeError("No such destination found")  # noqa: TRY003
-    return cupsDest(ffi_value=dest)
+    return cupsDest(ffi_value=dest)  # type: ignore[call-arg]
 
 
 def getError() -> tuple[IPPStatus, Optional[str]]:  # noqa: D103, N802
     status: IPPStatus = IPPStatus(_lib.cupsGetError())
-    message: str = _bytes_to_value(_lib.cupsGetErrorString())
+    message: str = _bytes_to_value(_lib.cupsGetErrorString())  # type: ignore[assignment]
 
     return (status, message)

@@ -32,16 +32,16 @@ class cupsMedia(cupsBaseClass):  # noqa: D101, N801
 
     @property
     def media(self) -> str:  # noqa: D102
-        return _bytes_to_value(self.ffi_value.media)
+        return _bytes_to_value(self.ffi_value.media)  # type: ignore[return-value]
 
     @property
     def color(self) -> int:  # noqa: D102
-        return _bytes_to_value(self.ffi_value.color)
+        return _bytes_to_value(self.ffi_value.color)  # type: ignore[return-value]
 
     @property
     def source(self) -> str:  # noqa: D102
-        return _bytes_to_value(self.ffi_value.source)
+        return _bytes_to_value(self.ffi_value.source)  # type: ignore[return-value]
 
     @property
     def type(self) -> str:  # noqa: D102
-        return _bytes_to_value(self.ffi_value.type)
+        return _bytes_to_value(self.ffi_value.type)  # type: ignore[return-value]

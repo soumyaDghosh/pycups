@@ -50,7 +50,7 @@ class CUPSEncoding(IntFlag):  # noqa: D101
     WINDOWS_950 = _lib.CUPS_ENCODING_WINDOWS_950
 
     def __str__(self) -> str:
-        return _bytes_to_value(_lib.cupsEncodingString(self.value))
+        return _bytes_to_value(_lib.cupsEncodingString(self.value))  # type: ignore[return-value]
 
     @classmethod
     def _missing_(cls, value):  # noqa: ANN001, ANN206

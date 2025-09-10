@@ -1,6 +1,6 @@
 import os  # noqa: D100
 
-import pkgconfig
+import pkgconfig  # type: ignore[import-untyped]
 from cffi import FFI
 
 LIBRARY = "cups3"

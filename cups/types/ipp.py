@@ -160,7 +160,7 @@ class IPPRequest(cupsBaseClass):  # noqa: D101
         if group is None or value_tag is None or name is None or value is None:
             raise RuntimeError("Invalid parameters passed")  # noqa: TRY003
 
-        language = _ffi.NULL if language is None else language.encode()
+        language = _ffi.NULL if language is None else language.encode()  # type: ignore[assignment]
 
         return IPPAttribute(
             _lib.ippAddString(
@@ -184,7 +184,7 @@ class IPPRequest(cupsBaseClass):  # noqa: D101
         if group is None or value_tag is None or name is None or values is None:
             raise RuntimeError("Invalid parameters passed")  # noqa: TRY003
 
-        language = _ffi.NULL if language is None else language.encode()
+        language = _ffi.NULL if language is None else language.encode()  # type: ignore[assignment]
 
         c_array = _ffi.new("char *[]", len(values))
         for i, value in enumerate(values):
@@ -233,7 +233,7 @@ class IPPError(Exception):
         return self._response.statuscode
 
     @property
-    def message(self) -> str:  # noqa: D102
+    def message(self) -> Optional[Union[str, bool]]:  # noqa: D102
         return _bytes_to_value(_lib.ippGetErrorString(self.status))
 
     @override

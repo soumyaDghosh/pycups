@@ -7,7 +7,7 @@ from cups.types.ipp import IPPRequest
 class _Base:
     http: Any
 
-    def _add_or_modify_printer(self, name: str) -> None:
+    def _add_or_modify_printer(self, name: str) -> IPPRequest:
         uri: str = f"ipp://localhost/printers/{name}"
         req: IPPRequest = IPPRequest(IPPOp.CUPS_ADD_MODIFY_PRINTER)
         req.addString(

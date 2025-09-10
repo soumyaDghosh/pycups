@@ -134,7 +134,7 @@ class IPPOp(IntFlag):  # noqa: D101
     VALIDATE_JOB = _lib.IPP_OP_VALIDATE_JOB
 
     def __str__(self) -> str:
-        return _bytes_to_value(_lib.ippOpString(self.value))
+        return _bytes_to_value(_lib.ippOpString(self.value))  # type: ignore[return-value]
 
     @classmethod
     def _missing_(cls, value):  # noqa: ANN001, ANN206

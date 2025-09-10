@@ -2,6 +2,8 @@ from typing import (  # noqa: D100
     Any,
     ClassVar,
     Optional,
+    Union,
+    cast,
 )
 
 from cups.enums.ipp import IPPOp, IPPTag
@@ -22,10 +24,10 @@ class cupsDestInfo(cupsBaseClass):  # noqa: N801
 class cupsOption(cupsBaseClass):  # noqa: D101, N801
     @property
     def name(self) -> str:  # noqa: D102
-        return _bytes_to_value(self.ffi_value.name)
+        return cast(str, _bytes_to_value(self.ffi_value.name))
 
     @property
-    def value(self) -> Optional[Any]:  # noqa: ANN401, D102
+    def value(self) -> Optional[Union[str, bool]]:  # noqa: D102
         return _bytes_to_value(self.ffi_value.value)
 
     ffi_name = "cups_option_t"
@@ -49,7 +51,7 @@ class cupsOption(cupsBaseClass):  # noqa: D101, N801
                 ipp_req.ffi_value,
                 group_tag,
                 self.name.encode(),
-                self.value.encode() if self.value else b"",
+                cast(str, self.value).encode() if self.value else b"",
             )
         )
 
@@ -81,7 +83,7 @@ class cupsOption(cupsBaseClass):  # noqa: D101, N801
         results: dict[str, cupsOption] = {}
         for i in range(count):
             new_opt: Any = opts[i]
-            results[str(_bytes_to_value(new_opt.name))] = cupsOption.from_cffi(
+            results[str(_bytes_to_value(new_opt.name))] = cupsOption.from_cffi(  # type: ignore[attr-defined]
                 opt=new_opt
             )
 
@@ -98,7 +100,7 @@ class cupsDest(cupsBaseClass):  # noqa: D101, N801
 
     @property
     def instance(self) -> Optional[str]:  # noqa: D102
-        return _bytes_to_value(self.ffi_value.instance)
+        return _bytes_to_value(self.ffi_value.instance)  # type: ignore[return-value]
 
     @property
     def options(self) -> dict[str, cupsOption]:  # noqa: D102
@@ -176,7 +178,7 @@ class cupsDest(cupsBaseClass):  # noqa: D101, N801
             group=IPPTag.OPERATION,
             value_tag=IPPTag.URI,
             name="printer-uri",
-            value=self.options["printer-uri-supported"].value,
+            value=self.options["printer-uri-supported"].value,  # type: ignore[arg-type]
         )
         res: IPPRequest = IPPRequest(_lib.cupsDoRequest(http, req.ffi_value, b"/"))
         if res is not None:
@@ -205,15 +207,15 @@ class cupsJob(cupsBaseClass):  # noqa: D101, N801
 
     @property
     def title(self) -> Optional[str]:  # noqa: D102
-        return _bytes_to_value(self.ffi_value.title)
+        return _bytes_to_value(self.ffi_value.title)  # type: ignore[return-value]
 
     @property
     def user(self) -> Optional[str]:  # noqa: D102
-        return _bytes_to_value(self.ffi_value.user)
+        return _bytes_to_value(self.ffi_value.user)  # type: ignore[return-value]
 
     @property
     def format(self) -> Optional[str]:  # noqa: D102
-        return _bytes_to_value(self.ffi_value.format)
+        return _bytes_to_value(self.ffi_value.format)  # type: ignore[return-value]
 
     @property
     def state(self) -> int:  # noqa: D102
@@ -280,4 +282,4 @@ class cupsLang(cupsBaseClass):  # noqa: D101, N801
     ffi_name = "cups_lang_t"
 
     def __str__(self) -> str:
-        return _bytes_to_value(_lib.cupsLangGetName(self.ffi_value))
+        return _bytes_to_value(_lib.cupsLangGetName(self.ffi_value))  # type: ignore[return-value]

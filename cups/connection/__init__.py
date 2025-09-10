@@ -32,7 +32,7 @@ class Connection(DestsMixin, JobMixin, _Base):
     @property
     def host(self) -> str:
         """Return the host of the CUPS server."""
-        return getServer()
+        return getServer()  # type: ignore[return-value]
 
     @host.setter
     def host(self, host: str) -> None:
@@ -58,7 +58,7 @@ class Connection(DestsMixin, JobMixin, _Base):
 
     @property
     def user(self) -> str:  # noqa: D102
-        return getUser()
+        return getUser()  # type: ignore[return-value]
 
     @user.setter
     def user(self, user: str) -> None:
@@ -104,7 +104,7 @@ class Connection(DestsMixin, JobMixin, _Base):
         )
 
     def getPassword(self, prompt: str, method: str, resource: str) -> str:  # noqa: D102, N802
-        return _bytes_to_value(
+        return _bytes_to_value(  # type: ignore[return-value]
             _lib.cupsGetPassword(
                 prompt.encode(), self.http, method.encode(), resource.encode()
             )

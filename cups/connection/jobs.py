@@ -14,7 +14,7 @@ class JobMixin:  # noqa: D101
         self, name: str, op: IPPOp, reason: Optional[str] = None
     ) -> None:
         uri: str = f"ipp://localhost/printers/{name}"
-        req: IPPRequest = IPPRequest.cffi_new(op)
+        req: IPPRequest = IPPRequest.cffi_new(op)  # type: ignore[attr-defined]
         req.addString(
             group=IPPTag.OPERATION, value_tag=IPPTag.URI, name="printer-uri", value=uri
         )

@@ -25,7 +25,7 @@ class DestsMixin(_Base):  # noqa: D101
         return cupsDest.from_cffi_list(dests=c_dests, count=count)
 
     def getDefault(self) -> str:  # noqa: D102, N802
-        return _bytes_to_value(_lib.cupsGetDefault(self.http))
+        return _bytes_to_value(_lib.cupsGetDefault(self.http))  # type: ignore[return-value]
 
     def getDests(self) -> dict[str, cupsDest]:  # noqa: D102, N802
         dests: cupsDest = cupsDest("**")
@@ -34,8 +34,8 @@ class DestsMixin(_Base):  # noqa: D101
         return cupsDest.from_cffi_list(dests=dests, count=count)
 
     def setDests(self, dests: list[cupsDest]) -> bool:  # noqa: D102, N802
-        return _bytes_to_value(
-            _lib.cupsSetDests(self.http, len(dests), cupsDest.to_cffi_list(dests))
+        return _bytes_to_value(  # type: ignore[return-value]
+            _lib.cupsSetDests(self.http, len(dests), cupsDest.to_cffi_list(dests))  # type: ignore[arg-type]
         )
 
     def copyDestInfo(  # noqa: D102, N802

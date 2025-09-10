@@ -1,4 +1,4 @@
-from ._cups import ffi, lib  # noqa: D104
+from ._cups import ffi, lib  # type: ignore[import-not-found]  # noqa: D104
 from .connection import (
     Connection,
 )
@@ -21,8 +21,8 @@ from .generic import (
     setUserAgent,
 )
 
-del connection  # noqa: F821
-del generic  # noqa: F821
+del connection  # type: ignore[name-defined]  # noqa: F821
+del generic  # type: ignore[name-defined]  # noqa: F821
 
 __all__ = [
     "Connection",
