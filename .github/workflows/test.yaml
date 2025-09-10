@@ -1,0 +1,35 @@
+name: test
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Install libcups3
+        run: |
+          sudo apt update
+          sudo apt install --yes autoconf build-essential libavahi-client-dev libnss-mdns libpng-dev libssl-dev zlib1g-dev
+          git clone --recurse-submodules https://github.com/OpenPrinting/libcups
+          pushd libcups
+          git checkout --recurse-submodules af31f816fe406ad944d7e429ca088605eeb7dc47
+          ./configure
+          make
+          sudo make install
+          popd
+          rm -rf libcups
+
+      - name: Setup environment
+        run: |
+          sudo apt install --yes python3-dev
+          make setup
+
+      - name: Run linters
+        run: |
+          make lint
