@@ -1,11 +1,8 @@
+from typing import Any, Optional  # noqa: D100
+
 from cups import _cups
-from cups.types.cups import cupsDest, cupsDestInfo
-from cups.types.media import cupsMedia
-from cups.types.ipp import IPPAttribute, IPPRequest, IPPStatus, IPPError
 from cups.enums.cups import CUPSDestFlags
-from cups.enums.media import CUPSMediaFlags
-from cups.enums.ipp import IPPOp, IPPTag
-from typing import Any, Dict, Optional
+from cups.types.cups import cupsDest, cupsDestInfo
 from cups.utils import _bytes_to_value
 
 from .base import _Base
@@ -14,10 +11,10 @@ _ffi = _cups.ffi
 _lib = _cups.lib
 
 
-class DestsMixin(_Base):
+class DestsMixin(_Base):  # noqa: D101
     http: Any
 
-    def addDest(self, name: str, instance: Optional[str] = None) -> Dict[str, cupsDest]:
+    def addDest(self, name: str, instance: Optional[str] = None) -> dict[str, cupsDest]:  # noqa: D102, N802
         dests = self.getDests()
         c_name = _ffi.new("char[]", name.encode("utf-8"))
         c_instance = (
@@ -27,28 +24,28 @@ class DestsMixin(_Base):
         count = _lib.cupsAddDest(c_name, c_instance, len(dests), c_dests)
         return cupsDest.from_cffi_list(dests=c_dests, count=count)
 
-    def getDefault(self) -> str:
+    def getDefault(self) -> str:  # noqa: D102, N802
         return _bytes_to_value(_lib.cupsGetDefault(self.http))
 
-    def getDests(self) -> Dict[str, cupsDest]:
+    def getDests(self) -> dict[str, cupsDest]:  # noqa: D102, N802
         dests: cupsDest = cupsDest("**")
         count: int = _lib.cupsGetDests(self.http, dests.ffi_value)
 
         return cupsDest.from_cffi_list(dests=dests, count=count)
 
-    def setDests(self, dests: list[cupsDest]) -> bool:
+    def setDests(self, dests: list[cupsDest]) -> bool:  # noqa: D102, N802
         return _bytes_to_value(
             _lib.cupsSetDests(self.http, len(dests), cupsDest.to_cffi_list(dests))
         )
 
-    def copyDestInfo(
+    def copyDestInfo(  # noqa: D102, N802
         self, dest: cupsDest, flags: CUPSDestFlags = CUPSDestFlags.NONE
     ) -> cupsDestInfo:
         return cupsDestInfo(
             _lib.cupsCopyDestInfo(self.http, dest.ffi_value, flags.value)
         )
 
-    def checkDestSupported(
+    def checkDestSupported(  # noqa: D102, N802
         self,
         dest: cupsDest,
         dinfo: cupsDestInfo,

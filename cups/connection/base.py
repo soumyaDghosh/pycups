@@ -1,7 +1,7 @@
-from typing import Any
-from cups import _cups
-from cups.types.ipp import IPPRequest, IPPStatus, IPPError
+from typing import Any  # noqa: D100
+
 from cups.enums.ipp import IPPOp, IPPTag
+from cups.types.ipp import IPPRequest
 
 
 class _Base:

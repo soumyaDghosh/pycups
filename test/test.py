@@ -1,4 +1,4 @@
-import cups
+import cups  # noqa: D100, INP001
 
 dests = cups.getDests()
 
@@ -11,4 +11,4 @@ for dest in dests:
 
 key_0 = list(dests.keys())[0]
 
-print(cups.getOption('printer-uri-supported', dests[key_0].options))
+print(cups.getOption('printer-uri-supported', dests[key_0].options))  # noqa: Q000

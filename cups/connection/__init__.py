@@ -1,4 +1,8 @@
+import socket  # noqa: D104
+from typing import Any, Optional
+
 from cups import _cups
+from cups.enums.http import HttpEncryption, HttpStatus
 from cups.generic import (
     getEncryption,
     getPort,
@@ -9,15 +13,11 @@ from cups.generic import (
     setServer,
     setUser,
 )
-from cups.enums.http import HttpEncryption, HttpStatus
-from typing import Any, Optional
-
-from .dests import DestsMixin
-from .jobs import JobMixin
-from .base import _Base
 from cups.utils import _bytes_to_value
 
-import socket
+from .base import _Base
+from .dests import DestsMixin
+from .jobs import JobMixin
 
 _ffi = _cups.ffi
 _lib = _cups.lib
@@ -35,7 +35,7 @@ class Connection(DestsMixin, JobMixin, _Base):
         return getServer()
 
     @host.setter
-    def host(self, host: str):
+    def host(self, host: str) -> None:
         setServer(host)
 
     @property
@@ -44,7 +44,7 @@ class Connection(DestsMixin, JobMixin, _Base):
         return getPort()
 
     @port.setter
-    def port(self, port: int):
+    def port(self, port: int) -> None:
         setPort(port)
 
     @property
@@ -53,15 +53,15 @@ class Connection(DestsMixin, JobMixin, _Base):
         return getEncryption()
 
     @encryption.setter
-    def encryption(self, encryption: HttpEncryption):
+    def encryption(self, encryption: HttpEncryption) -> None:
         setEncryption(encryption)
 
     @property
-    def user(self) -> str:
+    def user(self) -> str:  # noqa: D102
         return getUser()
 
     @user.setter
-    def user(self, user: str):
+    def user(self, user: str) -> None:
         setUser(user)
 
     def __init__(
@@ -71,7 +71,7 @@ class Connection(DestsMixin, JobMixin, _Base):
         encryption: Optional[HttpEncryption] = None,
         family: socket.AddressFamily = socket.AF_UNSPEC,
         msec: int = 0,
-    ):
+    ) -> None:
         if host:
             self.host = host
 
@@ -85,23 +85,32 @@ class Connection(DestsMixin, JobMixin, _Base):
         c_port = _ffi.cast("int", self.port)
         c_encryption = _ffi.cast("http_encryption_t", self.encryption)
         self.http = _lib.httpConnect(
-            c_host, c_port, _ffi.NULL, family, c_encryption, True, msec, _ffi.NULL
+            c_host,
+            c_port,
+            _ffi.NULL,
+            family,
+            c_encryption,
+            True,  # noqa: FBT003
+            msec,
+            _ffi.NULL,
         )
 
-    def connectAgain(self, msec: int) -> bool:
+    def connectAgain(self, msec: int) -> bool:  # noqa: D102, N802
         return bool(_lib.httpConnectAgain(self.http, msec, _ffi.NULL))
 
-    def doAuthentication(self, method: str, resource: str) -> bool:
-        return bool(_lib.cupsDoAuthentication(self.http, method.encode(), resource.encode()))
+    def doAuthentication(self, method: str, resource: str) -> bool:  # noqa: D102, N802
+        return bool(
+            _lib.cupsDoAuthentication(self.http, method.encode(), resource.encode())
+        )
 
-    def getPassword(self, prompt: str, method: str, resource: str) -> str:
+    def getPassword(self, prompt: str, method: str, resource: str) -> str:  # noqa: D102, N802
         return _bytes_to_value(
             _lib.cupsGetPassword(
                 prompt.encode(), self.http, method.encode(), resource.encode()
             )
         )
 
-    def getFile(self, resource: str, filname: str) -> HttpStatus:
+    def getFile(self, resource: str, filename: str) -> HttpStatus:  # noqa: D102, N802
         return HttpStatus(
-            _lib.cupsGetFile(self.http, resource.encode(), filname.encode())
+            _lib.cupsGetFile(self.http, resource.encode(), filename.encode())
         )

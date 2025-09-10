@@ -1,7 +1,7 @@
-from .cups import CUPSDestFlags
+from .cups import CUPSDestFlags  # noqa: D104
+from .encoding import CUPSEncoding
 from .http import HttpEncryption
 from .ipp import IPPOp, IPPRes, IPPState, IPPStatus, IPPTag
-from .encoding import CUPSEncoding
 
 __all__ = [
     "CUPSDestFlags",

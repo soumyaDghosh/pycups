@@ -1,14 +1,15 @@
-from cffi import FFI
-import os
+import os  # noqa: D100
+
 import pkgconfig
+from cffi import FFI
 
 LIBRARY = "cups3"
 VERSION = "3.0rc4"
 
 
-def get_include_dirs():
+def get_include_dirs():  # noqa: ANN201, D103
     if not (pkgconfig.installed(LIBRARY, f"<={VERSION}")):
-        raise Exception(
+        raise Exception(  # noqa: TRY002, TRY003
             "Cannot find pkg-config file for cups3.\nIs CUPS 3.0 development libraries properly installed?"
         )
     cflags = [c[2:] for c in (pkgconfig.cflags(LIBRARY).split(" "))]
@@ -25,7 +26,7 @@ INCLUDE_DIRS, LIBRARY_DIRS = get_include_dirs()
 ffibuilder = FFI()
 
 cdefs = ""
-dir_path = os.path.join(os.path.dirname(__file__), "headers/")
+dir_path = os.path.join(os.path.dirname(__file__), "headers/")  # noqa: PTH118, PTH120
 headers = [
     "base.h",
     "array.h",
@@ -46,8 +47,8 @@ headers = [
 ]
 print(dir_path)
 for file in headers:
-    file_path = os.path.join(dir_path, file)
-    with open(file_path) as f:
+    file_path = os.path.join(dir_path, file)  # noqa: PTH118
+    with open(file_path) as f:  # noqa: PTH123
         cdefs += f.read()
 
 ffibuilder.cdef(cdefs)

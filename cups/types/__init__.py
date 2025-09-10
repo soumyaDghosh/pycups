@@ -1,4 +1,4 @@
-from .cups import cupsDest, cupsJob, cupsOption
+from .cups import cupsDest, cupsJob, cupsOption  # noqa: A005, D104
 from .ipp import IPPAttribute, IPPRequest
 
 __all__ = [

@@ -1,13 +1,15 @@
-from .base import cupsBaseClass, _lib, _ffi
-from cups.utils import _bytes_to_value
-from typing import Any, ClassVar, override, Optional, Union
+import struct  # noqa: D100
 from dataclasses import dataclass, field
-from cups.enums.ipp import IPPRes, IPPState, IPPStatus, IPPTag, IPPOp
 from datetime import datetime
-import struct
+from typing import Any, ClassVar, Optional, Union, override
+
+from cups.enums.ipp import IPPOp, IPPRes, IPPState, IPPStatus, IPPTag
+from cups.utils import _bytes_to_value
+
+from .base import _ffi, _lib, cupsBaseClass
 
 
-class IPPAttribute(cupsBaseClass):
+class IPPAttribute(cupsBaseClass):  # noqa: D101
     ffi_name: ClassVar[str] = "ipp_attribute_t"
     """
     https://openprinting.github.io/cups/libcups/cupspm.html#ippDeleteAttribute
@@ -17,26 +19,26 @@ class IPPAttribute(cupsBaseClass):
     ffi_free: ClassVar[str] = "ippDeleteAttributes"
 
     @property
-    def name(self) -> str:
+    def name(self) -> str:  # noqa: D102
         c_name = _lib.ippGetName(self.ffi_value)
         if c_name == _ffi.NULL:
             return ""
         return str(_bytes_to_value(c_name))
 
     @property
-    def group_tag(self) -> int:
+    def group_tag(self) -> int:  # noqa: D102
         return _lib.ippGetGroupTag(self.ffi_value)
 
     @property
-    def value_tag(self) -> IPPTag:
+    def value_tag(self) -> IPPTag:  # noqa: D102
         return IPPTag(_lib.ippGetValueTag(self.ffi_value))
 
     @property
-    def count(self) -> int:
+    def count(self) -> int:  # noqa: D102
         return _lib.ippGetCount(self.ffi_value)
 
     @property
-    def values(self) -> list[Any]:
+    def values(self) -> list[Any]:  # noqa: D102, PLR0911
         if self.value_tag in [
             IPPTag.ZERO,
             IPPTag.NOVALUE,
@@ -53,7 +55,7 @@ class IPPAttribute(cupsBaseClass):
             return ranges
         if self.value_tag in [IPPTag.INTEGER, IPPTag.ENUM]:
             return [_lib.ippGetInteger(self.ffi_value, i) for i in range(self.count)]
-        elif self.value_tag in [
+        if self.value_tag in [
             IPPTag.TEXT,
             IPPTag.NAME,
             IPPTag.KEYWORD,
@@ -66,15 +68,15 @@ class IPPAttribute(cupsBaseClass):
                 _bytes_to_value(_lib.ippGetString(self.ffi_value, i, _ffi.NULL))
                 for i in range(self.count)
             ]
-        elif self.value_tag == IPPTag.BOOLEAN:
+        if self.value_tag == IPPTag.BOOLEAN:
             return [_lib.ippGetBoolean(self.ffi_value, i) for i in range(self.count)]
-        elif self.value_tag == IPPTag.DATE:
+        if self.value_tag == IPPTag.DATE:
             dates: list[datetime] = []
             for i in range(self.count):
                 date_hex_bytes: bytes = _ffi.string(_lib.ippGetDate(self.ffi_value, i))
                 dates.append(datetime(*struct.unpack(">H5B", date_hex_bytes)))
             return dates
-        elif self.value_tag == IPPTag.RESOLUTION:
+        if self.value_tag == IPPTag.RESOLUTION:
             resolutions = []
             for i in range(self.count):
                 unit = _ffi.new("ipp_res_t *")
@@ -82,26 +84,25 @@ class IPPAttribute(cupsBaseClass):
                 _lib.ippGetResolution(self.ffi_value, i, res, unit)
                 resolutions.append((res[0], IPPRes(unit[0])))
             return resolutions
-        elif self.value_tag == IPPTag.BEGIN_COLLECTION:
+        if self.value_tag == IPPTag.BEGIN_COLLECTION:
             collections = []
             for i in range(self.count):
                 attr = IPPRequest(_lib.ippGetCollection(self.ffi_value, i))
                 collections.append(attr)
             return collections
-        else:
-            return []
+        return []
 
-    def __str__(self):
+    def __str__(self) -> str:
         required_size = _lib.ippAttributeString(self.ffi_value, _ffi.NULL, 0) + 1
         buffer = _ffi.new("char[]", required_size)
         _lib.ippAttributeString(self.ffi_value, buffer, required_size)
         return str(_bytes_to_value(buffer))
 
 
-class IPPRequest(cupsBaseClass):
+class IPPRequest(cupsBaseClass):  # noqa: D101
     ffi_name: ClassVar[str] = "ipp_t"
 
-    def __init__(self, arg: Optional[Union[IPPOp, Any]] = None):
+    def __init__(self, arg: Optional[Union[IPPOp, Any]] = None) -> None:  # noqa: ANN401
         if isinstance(arg, IPPOp):
             self.ffi_value = _lib.ippNewRequest(arg)
 
@@ -112,10 +113,10 @@ class IPPRequest(cupsBaseClass):
             self.ffi_value = _lib.ippNew()
 
         else:
-            raise ValueError("Invalid arguments passed")
+            raise ValueError("Invalid arguments passed")  # noqa: TRY003
 
     @property
-    def attributes(self) -> list[IPPAttribute]:
+    def attributes(self) -> list[IPPAttribute]:  # noqa: D102
         attrs: list[IPPAttribute] = []
         attr = _lib.ippGetFirstAttribute(self.ffi_value)
         while attr != _ffi.NULL:
@@ -124,23 +125,23 @@ class IPPRequest(cupsBaseClass):
         return attrs
 
     @property
-    def operation(self) -> IPPOp:
+    def operation(self) -> IPPOp:  # noqa: D102
         return IPPOp(_lib.ippGetOperation(self.ffi_value))
 
     @property
-    def state(self) -> IPPState:
+    def state(self) -> IPPState:  # noqa: D102
         return IPPState(_lib.ippGetState(self.ffi_value))
 
     @property
-    def statuscode(self) -> IPPStatus:
+    def statuscode(self) -> IPPStatus:  # noqa: D102
         return IPPStatus(_lib.ippGetStatusCode(self.ffi_value))
 
     @property
-    def request_id(self) -> int:
+    def request_id(self) -> int:  # noqa: D102
         return _lib.ippGetRequestId(self.ffi_value)
 
     @property
-    def version(self) -> float:
+    def version(self) -> float:  # noqa: D102
         minor = _ffi.new("int *")
         major = _lib.ippGetVersion(self.ffi_value, minor)
         return float(f"{major}.{minor[0]}")
@@ -148,7 +149,7 @@ class IPPRequest(cupsBaseClass):
     def __len__(self) -> int:
         return _lib.ippGetLength(self.ffi_value)
 
-    def addString(
+    def addString(  # noqa: D102, N802
         self,
         group: IPPTag,
         value_tag: IPPTag,
@@ -157,7 +158,7 @@ class IPPRequest(cupsBaseClass):
         language: Optional[str] = None,
     ) -> IPPAttribute:
         if group is None or value_tag is None or name is None or value is None:
-            raise RuntimeError("Invalid parameters passed")
+            raise RuntimeError("Invalid parameters passed")  # noqa: TRY003
 
         language = _ffi.NULL if language is None else language.encode()
 
@@ -172,7 +173,7 @@ class IPPRequest(cupsBaseClass):
             )
         )
 
-    def addStrings(
+    def addStrings(  # noqa: ANN201, D102, N802
         self,
         group: IPPTag,
         value_tag: IPPTag,
@@ -181,7 +182,7 @@ class IPPRequest(cupsBaseClass):
         language: Optional[str] = None,
     ):
         if group is None or value_tag is None or name is None or values is None:
-            raise RuntimeError("Invalid parameters passed")
+            raise RuntimeError("Invalid parameters passed")  # noqa: TRY003
 
         language = _ffi.NULL if language is None else language.encode()
 
@@ -201,42 +202,40 @@ class IPPRequest(cupsBaseClass):
             )
         )
 
-    def setString(
+    def setString(  # noqa: ANN201, D102, N802
         self,
         attr: IPPAttribute,
         position: int,
         value: str,
     ):
         if attr is None or position < 0 or value is None:
-            raise RuntimeError("Invalid parameters passed")
+            raise RuntimeError("Invalid parameters passed")  # noqa: TRY003
 
         return IPPAttribute(
             _lib.ippSetString(self.ffi_value, attr.ffi_value, position, value.encode())
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.__class__.__name__}(state={self.state})"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.__class__.__name__}(state={self.state}, statuscode={self.statuscode}, version={self.version})"
 
 
 @dataclass
 class IPPError(Exception):
-    """
-    Exception for IPP/CUPS request errors.
-    """
+    """Exception for IPP/CUPS request errors."""
 
     _response: IPPRequest = field(repr=False)
 
     @property
-    def status(self) -> IPPStatus:
+    def status(self) -> IPPStatus:  # noqa: D102
         return self._response.statuscode
 
     @property
-    def message(self) -> str:
+    def message(self) -> str:  # noqa: D102
         return _bytes_to_value(_lib.ippGetErrorString(self.status))
 
     @override
-    def __str__(self):
+    def __str__(self) -> str:
         return f"IPP Error {self.status.value} ({self.status.name}): {self.message}"

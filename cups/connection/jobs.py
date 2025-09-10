@@ -1,15 +1,18 @@
+from typing import Any, Optional  # noqa: D100
+
 from cups import _cups
 from cups.enums.ipp import IPPOp, IPPStatus, IPPTag
 from cups.types.ipp import IPPError, IPPRequest
-from typing import Any, Optional
 
 _lib = _cups.lib
 
 
-class JobMixin:
+class JobMixin:  # noqa: D101
     http: Any
 
-    def _do_printer_request(self, name: str, op: IPPOp, reason: Optional[str] = None) -> None:
+    def _do_printer_request(
+        self, name: str, op: IPPOp, reason: Optional[str] = None
+    ) -> None:
         uri: str = f"ipp://localhost/printers/{name}"
         req: IPPRequest = IPPRequest.cffi_new(op)
         req.addString(
@@ -31,10 +34,8 @@ class JobMixin:
         if not answer or answer.statuscode > IPPStatus.OK_CONFLICTING:
             raise IPPError(answer)
 
-        return None
-
-    def acceptJobs(self, queue_name: str) -> None:
+    def acceptJobs(self, queue_name: str) -> None:  # noqa: D102, N802
         return self._do_printer_request(queue_name, op=IPPOp.CUPS_ACCEPT_JOBS)
 
-    def rejectJobs(self, queue_name: str) -> None:
+    def rejectJobs(self, queue_name: str) -> None:  # noqa: D102, N802
         return self._do_printer_request(queue_name, op=IPPOp.CUPS_REJECT_JOBS)

@@ -1,17 +1,18 @@
-from enum import IntFlag
+from enum import IntFlag  # noqa: D100
+
 from cups import _cups
 
 _lib = _cups.lib
 
 
-class HttpEncryption(IntFlag):
+class HttpEncryption(IntFlag):  # noqa: D101
     IF_REQUESTED = _lib.HTTP_ENCRYPTION_IF_REQUESTED
     NEVER = _lib.HTTP_ENCRYPTION_NEVER
     REQUIRED = _lib.HTTP_ENCRYPTION_REQUIRED
     ALWAYS = _lib.HTTP_ENCRYPTION_ALWAYS
 
 
-class HttpStatus(IntFlag):
+class HttpStatus(IntFlag):  # noqa: D101
     ACCEPTED = _lib.HTTP_STATUS_ACCEPTED
     ALREADY_REPORTED = _lib.HTTP_STATUS_ALREADY_REPORTED
     BAD_GATEWAY = _lib.HTTP_STATUS_BAD_GATEWAY

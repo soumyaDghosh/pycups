@@ -1,11 +1,12 @@
-from enum import IntFlag
+from enum import IntFlag  # noqa: D100
+
 from cups import _cups
 from cups.utils import _bytes_to_value
 
 _lib = _cups.lib
 
 
-class IPPOp(IntFlag):
+class IPPOp(IntFlag):  # noqa: D101
     ACKNOWLEDGE_DOCUMENT = _lib.IPP_OP_ACKNOWLEDGE_DOCUMENT
     ACKNOWLEDGE_ENCRYPTED_JOB_ATTRIBUTES = (
         _lib.IPP_OP_ACKNOWLEDGE_ENCRYPTED_JOB_ATTRIBUTES
@@ -132,18 +133,18 @@ class IPPOp(IntFlag):
     VALIDATE_DOCUMENT = _lib.IPP_OP_VALIDATE_DOCUMENT
     VALIDATE_JOB = _lib.IPP_OP_VALIDATE_JOB
 
-    def __str__(self):
+    def __str__(self) -> str:
         return _bytes_to_value(_lib.ippOpString(self.value))
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value):  # noqa: ANN001, ANN206
         if isinstance(value, str):
             op = _lib.ippOpValue(value.encode())
             return cls(op)
         return None
 
 
-class IPPTag(IntFlag):
+class IPPTag(IntFlag):  # noqa: D101
     ADMINDEFINE = _lib.IPP_TAG_ADMINDEFINE
     BEGIN_COLLECTION = _lib.IPP_TAG_BEGIN_COLLECTION
     BOOLEAN = _lib.IPP_TAG_BOOLEAN
@@ -188,7 +189,7 @@ class IPPTag(IntFlag):
     ZERO = _lib.IPP_TAG_ZERO
 
 
-class IPPState(IntFlag):
+class IPPState(IntFlag):  # noqa: D101
     ATTRIBUTE = _lib.IPP_STATE_ATTRIBUTE
     DATA = _lib.IPP_STATE_DATA
     ERROR = _lib.IPP_STATE_ERROR
@@ -196,7 +197,7 @@ class IPPState(IntFlag):
     IDLE = _lib.IPP_STATE_IDLE
 
 
-class IPPStatus(IntFlag):
+class IPPStatus(IntFlag):  # noqa: D101
     CUPS_INVALID = _lib.IPP_STATUS_CUPS_INVALID
     ERROR_ACCOUNT_AUTHORIZATION_FAILED = (
         _lib.IPP_STATUS_ERROR_ACCOUNT_AUTHORIZATION_FAILED
@@ -262,6 +263,6 @@ class IPPStatus(IntFlag):
     OK_TOO_MANY_EVENTS = _lib.IPP_STATUS_OK_TOO_MANY_EVENTS
 
 
-class IPPRes(IntFlag):
+class IPPRes(IntFlag):  # noqa: D101
     CM = _lib.IPP_RES_PER_CM
     INCH = _lib.IPP_RES_PER_INCH

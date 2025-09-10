@@ -1,10 +1,12 @@
-from enum import IntFlag
+from enum import IntFlag  # noqa: D100
+
 from cups import _cups
 from cups.utils import _bytes_to_value
 
 _lib = _cups.lib
 
-class CUPSEncoding(IntFlag):
+
+class CUPSEncoding(IntFlag):  # noqa: D101
     BG18030 = _lib.CUPS_ENCODING_BG18030
     EUC_CN = _lib.CUPS_ENCODING_EUC_CN
     EUC_JP = _lib.CUPS_ENCODING_EUC_JP
@@ -47,11 +49,11 @@ class CUPSEncoding(IntFlag):
     WINDOWS_949 = _lib.CUPS_ENCODING_WINDOWS_949
     WINDOWS_950 = _lib.CUPS_ENCODING_WINDOWS_950
 
-    def __str__(self):
+    def __str__(self) -> str:
         return _bytes_to_value(_lib.cupsEncodingString(self.value))
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value):  # noqa: ANN001, ANN206
         if isinstance(value, str):
             enc = _lib.cupsEncodingValue(value.encode())
             return cls(enc)

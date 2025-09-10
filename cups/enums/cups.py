@@ -1,10 +1,11 @@
-from enum import IntFlag
+from enum import IntFlag  # noqa: D100
+
 from cups import _cups
 
 _lib = _cups.lib
 
 
-class CUPSDestFlags(IntFlag):
+class CUPSDestFlags(IntFlag):  # noqa: D101
     NONE = _lib.CUPS_DEST_FLAGS_NONE
     UNCONNECTED = _lib.CUPS_DEST_FLAGS_UNCONNECTED
     MORE = _lib.CUPS_DEST_FLAGS_MORE
