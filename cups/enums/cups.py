@@ -14,3 +14,22 @@ class CUPSDestFlags(IntFlag):
     CONNECTING = _lib.CUPS_DEST_FLAGS_CONNECTING
     CANCELED = _lib.CUPS_DEST_FLAGS_CANCELED
     DEVICE = _lib.CUPS_DEST_FLAGS_DEVICE
+
+
+class CUPSJog(IntFlag):
+    FILE = _lib.CUPS_JOG_FILE
+    JOB = _lib.CUPS_JOG_JOB
+    NONE = _lib.CUPS_JOG_NONE
+    SET = _lib.CUPS_JOG_SET
+
+class CUPSJWA(IntFlag):
+    ES256 = _lib.CUPS_JWA_ES256
+    ES384 = _lib.CUPS_JWA_ES384
+    ES512 = _lib.CUPS_JWA_ES512
+    HS256 = _lib.CUPS_JWA_HS256
+    HS384 = _lib.CUPS_JWA_HS384
+    HS512 = _lib.CUPS_JWA_HS512
+    NONE = _lib.CUPS_JWA_NONE
+    RS256 = _lib.CUPS_JWA_RS256
+    RS384 = _lib.CUPS_JWA_RS384
+    RS512 = _lib.CUPS_JWA_RS512
