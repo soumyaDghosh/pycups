@@ -1,6 +1,6 @@
 from cups import _cups
 
-from typing import Any, ClassVar
+from typing import Any
 from abc import ABC
 
 _ffi = _cups.ffi
@@ -8,8 +8,8 @@ _lib = _cups.lib
 
 
 class cupsBaseClass(ABC):
-    ffi_name: ClassVar[str]
-    ffi_free: ClassVar[str]
+    ffi_name: str
+    ffi_free: str
     ffi_value: Any
 
     def __init__(self, args=None):
