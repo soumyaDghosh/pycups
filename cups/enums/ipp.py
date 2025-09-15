@@ -201,6 +201,16 @@ class IPPTag(IntFlag):
     URISCHEME = _lib.IPP_TAG_URISCHEME
     ZERO = _lib.IPP_TAG_ZERO
 
+    def __str__(self):
+        return _bytes_to_value(_lib.ippTagString(self.value))
+
+    @classmethod
+    def _missing_(cls, value):
+        if isinstance(value, str):
+            tag = _lib.ippTagValue(value.encode())
+            return cls(tag)
+        return None
+
 
 class IPPState(IntFlag):
     ATTRIBUTE = _lib.IPP_STATE_ATTRIBUTE
@@ -274,6 +284,9 @@ class IPPStatus(IntFlag):
     OK_IGNORED_OR_SUBSTITUTED = _lib.IPP_STATUS_OK_IGNORED_OR_SUBSTITUTED
     OK_IGNORED_SUBSCRIPTIONS = _lib.IPP_STATUS_OK_IGNORED_SUBSCRIPTIONS
     OK_TOO_MANY_EVENTS = _lib.IPP_STATUS_OK_TOO_MANY_EVENTS
+
+    def __str__(self):
+        return _bytes_to_value(_lib.ippStateString(self.value))
 
 
 class IPPRes(IntFlag):
