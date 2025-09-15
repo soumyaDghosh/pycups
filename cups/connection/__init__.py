@@ -74,7 +74,7 @@ class Connection(DestsMixin, JobMixin, _Base):
         port: Optional[int] = None,
         encryption: Optional[HttpEncryption] = None,
         family: socket.AddressFamily = socket.AF_UNSPEC,
-        msec: int = 0,
+        msec: int = 3000,
     ):
         if host:
             self.host = host
