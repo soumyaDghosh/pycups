@@ -22,3 +22,6 @@ def langGetString(message: str, lang: cupsLang = None) -> str:
     if not lang:
         lang = langDefault()
     return _bytes_to_value(_lib.cupsLangGetString(lang.ffi_value, message.encode()))
+
+def langSetDirectory(directory: str) -> None:
+    _lib.cupsLangSetDirectory(directory.encode())
