@@ -1,7 +1,15 @@
-from .cups import CUPSDestFlags, CUPSOGrant, CUPSJog, CUPSJWA, CUPSJType
+from .cups import (
+    CUPSJWA,
+    CUPSDestFlags,
+    CUPSJog,
+    CUPSJType,
+    CUPSJWSFormat,
+    CUPSOGrant,
+    CUPSRasterMode,
+)
+from .encoding import CUPSEncoding
 from .http import HttpEncryption
 from .ipp import IPPOp, IPPOrient, IPPQuality, IPPRes, IPPState, IPPStatus, IPPTag
-from .encoding import CUPSEncoding
 
 __all__ = [
     "CUPSDestFlags",
@@ -9,7 +17,9 @@ __all__ = [
     "CUPSOGrant",
     "CUPSJog",
     "CUPSJWA",
+    "CUPSJWSFormat",
     "CUPSJType",
+    "CUPSRasterMode",
     "HttpEncryption",
     "IPPOp",
     "IPPOrient",

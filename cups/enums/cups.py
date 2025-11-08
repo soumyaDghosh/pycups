@@ -1,4 +1,5 @@
 from enum import IntFlag
+
 from cups import _cups
 
 _lib = _cups.lib
@@ -22,6 +23,7 @@ class CUPSJog(IntFlag):
     NONE = _lib.CUPS_JOG_NONE
     SET = _lib.CUPS_JOG_SET
 
+
 class CUPSJWA(IntFlag):
     ES256 = _lib.CUPS_JWA_ES256
     ES384 = _lib.CUPS_JWA_ES384
@@ -34,6 +36,12 @@ class CUPSJWA(IntFlag):
     RS384 = _lib.CUPS_JWA_RS384
     RS512 = _lib.CUPS_JWA_RS512
 
+
+class CUPSJWSFormat(IntFlag):
+    COMPACT = _lib.CUPS_JWS_FORMAT_COMPACT
+    JSON = _lib.CUPS_JWS_FORMAT_JSON
+
+
 class CUPSJType(IntFlag):
     ARRAY = _lib.CUPS_JTYPE_ARRAY
     FALSE = _lib.CUPS_JTYPE_FALSE
@@ -44,7 +52,15 @@ class CUPSJType(IntFlag):
     STRING = _lib.CUPS_JTYPE_STRING
     TRUE = _lib.CUPS_JTYPE_TRUE
 
+
 class CUPSOGrant(IntFlag):
     AUTHORIZATION_CODE = _lib.CUPS_OGRANT_AUTHORIZATION_CODE
     DEVICE_CODE = _lib.CUPS_OGRANT_DEVICE_CODE
     REFRESH_TOKEN = _lib.CUPS_OGRANT_REFRESH_TOKEN
+
+
+class CUPSRasterMode(IntFlag):
+    READ = _lib.CUPS_RASTER_READ
+    WRITE = _lib.CUPS_RASTER_WRITE
+    WRITE_COMPRESSED = _lib.CUPS_RASTER_WRITE_COMPRESSED
+    WRITE_PWG = _lib.CUPS_RASTER_WRITE_PWG

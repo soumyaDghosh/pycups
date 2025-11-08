@@ -1,6 +1,7 @@
 from enum import IntFlag
+
 from cups import _cups
-from cups.utils import _bytes_to_value
+from cups.utils import _bytes_to_value, _value_to_bytes
 
 _lib = _cups.lib
 
@@ -219,6 +220,9 @@ class IPPState(IntFlag):
     HEADER = _lib.IPP_STATE_HEADER
     IDLE = _lib.IPP_STATE_IDLE
 
+    def __str__(self):
+        return _bytes_to_value(_lib.ippStateString(self.value))
+
 
 class IPPStatus(IntFlag):
     CUPS_INVALID = _lib.IPP_STATUS_CUPS_INVALID
@@ -285,8 +289,14 @@ class IPPStatus(IntFlag):
     OK_IGNORED_SUBSCRIPTIONS = _lib.IPP_STATUS_OK_IGNORED_SUBSCRIPTIONS
     OK_TOO_MANY_EVENTS = _lib.IPP_STATUS_OK_TOO_MANY_EVENTS
 
+    def _missing_(cls, value):
+        if isinstance(value, str):
+            status = _lib.ippStatusValue(_value_to_bytes(value))
+            return cls(status)
+        return None
+
     def __str__(self):
-        return _bytes_to_value(_lib.ippStateString(self.value))
+        return _bytes_to_value(_lib.ippErrorString(self.value))
 
 
 class IPPRes(IntFlag):

@@ -1,21 +1,49 @@
-from cups.types.base import cupsBaseClass, _lib
-from .pageheader import cupsPageHeader
+from pathlib import Path
+
+from cups.enums import CUPSRasterMode, IPPOrient, IPPQuality
+from cups.types.base import _lib, cupsBaseClass
 from cups.types.media import cupsMedia
-from cups.enums import IPPQuality, IPPOrient
 from cups.utils import _value_to_bytes
 
-class cupsRaster(cupsBaseClass):
+from .pageheader import cupsPageHeader
 
+
+class cupsRaster(cupsBaseClass):
     ffi_name = "cups_raster_t"
 
     def initHeader(
-            self, header: cupsPageHeader, media: cupsMedia, optimize: str, quality: IPPQuality, intent: str, orientation: IPPOrient, sides: list[str], type: str, xdpi: int, ydpi: int, sheet_back: str
+        self,
+        header: cupsPageHeader,
+        media: cupsMedia,
+        optimize: str,
+        quality: IPPQuality,
+        intent: str,
+        orientation: IPPOrient,
+        sides: list[str],
+        type: str,
+        xdpi: int,
+        ydpi: int,
+        sheet_back: str,
     ) -> bool:
         return bool(
             _lib.cupsRasterInitHeader(
-                header.ffi_value, media.ffi_value, optimize.encode(), quality.value, intent.encode(), orientation.value, _value_to_bytes(sides), type.encode(), xdpi, ydpi, sheet_back.encode()
+                header.ffi_value,
+                media.ffi_value,
+                optimize.encode(),
+                quality.value,
+                intent.encode(),
+                orientation.value,
+                _value_to_bytes(sides),
+                type.encode(),
+                xdpi,
+                ydpi,
+                sheet_back.encode(),
             )
         )
+
+    @classmethod
+    def open(cls, file: Path, mode: CUPSRasterMode) -> "cupsRaster":
+        return cupsRaster(_lib.cupsRasterOpen(file.open().fileno(), mode.value))
 
     def readHeader(self) -> cupsPageHeader:
         header = cupsPageHeader()

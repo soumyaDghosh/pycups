@@ -1,20 +1,29 @@
-from .base import cupsBaseClass, _lib, _ffi
-from cups.utils import _bytes_to_value
-from typing import Any, ClassVar, override, Optional, Union
-from dataclasses import dataclass, field
-from cups.enums.ipp import IPPRes, IPPState, IPPStatus, IPPTag, IPPOp
-from datetime import datetime
 import struct
+from dataclasses import dataclass, field
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Optional, Union, override
+
+from cups.enums.ipp import IPPOp, IPPRes, IPPState, IPPStatus, IPPTag
+from cups.types.http import Http
+from cups.utils import _bytes_to_value, _value_to_bytes
+
+from .base import _ffi, _lib, cupsBaseClass
 
 
 class IPPAttribute(cupsBaseClass):
-    ffi_name: ClassVar[str] = "ipp_attribute_t"
+    ffi_name: str = "ipp_attribute_t"
     """
     https://openprinting.github.io/cups/libcups/cupspm.html#ippDeleteAttribute
     The doc says: "Delete a single attribute in an IPP message."
     Note: There is no way to actually delete a single attribute.
     """
-    ffi_free: ClassVar[str] = "ippDeleteAttributes"
+    ffi_free: str = "ippDeleteAttributes"
+
+    @property
+    def credentials(self) -> str:
+        c_credentials = _lib.ippCopyCredentialsString(self.ffi_value)
+        return str(_bytes_to_value(c_credentials))
 
     @property
     def name(self) -> str:
@@ -53,7 +62,7 @@ class IPPAttribute(cupsBaseClass):
             return ranges
         if self.value_tag in [IPPTag.INTEGER, IPPTag.ENUM]:
             return [_lib.ippGetInteger(self.ffi_value, i) for i in range(self.count)]
-        elif self.value_tag in [
+        if self.value_tag in [
             IPPTag.TEXT,
             IPPTag.NAME,
             IPPTag.KEYWORD,
@@ -66,15 +75,15 @@ class IPPAttribute(cupsBaseClass):
                 _bytes_to_value(_lib.ippGetString(self.ffi_value, i, _ffi.NULL))
                 for i in range(self.count)
             ]
-        elif self.value_tag == IPPTag.BOOLEAN:
+        if self.value_tag == IPPTag.BOOLEAN:
             return [_lib.ippGetBoolean(self.ffi_value, i) for i in range(self.count)]
-        elif self.value_tag == IPPTag.DATE:
+        if self.value_tag == IPPTag.DATE:
             dates: list[datetime] = []
             for i in range(self.count):
                 date_hex_bytes: bytes = _ffi.string(_lib.ippGetDate(self.ffi_value, i))
                 dates.append(datetime(*struct.unpack(">H5B", date_hex_bytes)))
             return dates
-        elif self.value_tag == IPPTag.RESOLUTION:
+        if self.value_tag == IPPTag.RESOLUTION:
             resolutions = []
             for i in range(self.count):
                 unit = _ffi.new("ipp_res_t *")
@@ -82,14 +91,61 @@ class IPPAttribute(cupsBaseClass):
                 _lib.ippGetResolution(self.ffi_value, i, res, unit)
                 resolutions.append((res[0], IPPRes(unit[0])))
             return resolutions
-        elif self.value_tag == IPPTag.BEGIN_COLLECTION:
+        if self.value_tag == IPPTag.BEGIN_COLLECTION:
             collections = []
             for i in range(self.count):
                 attr = IPPRequest(_lib.ippGetCollection(self.ffi_value, i))
                 collections.append(attr)
             return collections
-        else:
-            return []
+        return []
+
+    def setBoolean(self, ipp_req: "IPPRequest", value: bool) -> bool:
+        attr_ptr = _ffi.new("ipp_attribute_t **")
+        attr_ptr[0] = self.ffi_value
+
+        ok = _lib.ippSetBoolean(ipp_req.ffi_value, attr_ptr, 0, bool(value))
+
+        # Update our ffi_value in case the library created/changed the attribute.
+        self.ffi_value = attr_ptr[0]
+        return bool(_bytes_to_value(ok))
+
+    def setDate(self, ipp_req: "IPPRequest", value: datetime) -> bool:
+        attr_ptr = _ffi.new("ipp_attribute_t **")
+        attr_ptr[0] = self.ffi_value
+
+        date_bytes = struct.pack(
+            ">H5B",
+            value.year,
+            value.month,
+            value.day,
+            value.hour,
+            value.minute,
+            value.second,
+        )
+        c_date = _ffi.new("char []", date_bytes)
+
+        ok = _lib.ippSetDate(ipp_req.ffi_value, attr_ptr, 0, c_date)
+
+        self.ffi_value = attr_ptr[0]
+        return bool(_bytes_to_value(ok))
+
+    def setInteger(self, ipp_req: "IPPRequest", value: int) -> bool:
+        attr_ptr = _ffi.new("ipp_attribute_t **")
+        attr_ptr[0] = self.ffi_value
+
+        ok = _lib.ippSetInteger(ipp_req.ffi_value, attr_ptr, 0, value)
+
+        self.ffi_value = attr_ptr[0]
+        return bool(_bytes_to_value(ok))
+
+    def setName(self, ipp_req: "IPPRequest", value: str) -> bool:
+        attr_ptr = _ffi.new("ipp_attribute_t **")
+        attr_ptr[0] = self.ffi_value
+
+        ok = _lib.ippSetName(ipp_req.ffi_value, attr_ptr, 0, value.encode())
+
+        self.ffi_value = attr_ptr[0]
+        return bool(_bytes_to_value(ok))
 
     def __str__(self):
         required_size = _lib.ippAttributeString(self.ffi_value, _ffi.NULL, 0) + 1
@@ -99,7 +155,7 @@ class IPPAttribute(cupsBaseClass):
 
 
 class IPPRequest(cupsBaseClass):
-    ffi_name: ClassVar[str] = "ipp_t"
+    ffi_name: str = "ipp_t"
 
     def __init__(self, arg: Optional[Union[IPPOp, Any]] = None):
         if isinstance(arg, IPPOp):
@@ -214,6 +270,31 @@ class IPPRequest(cupsBaseClass):
             _lib.ippSetString(self.ffi_value, attr.ffi_value, position, value.encode())
         )
 
+    def read(self, http: Http) -> IPPState:
+        return IPPState(_lib.ippRead(http.ffi_value, self.ffi_value))
+
+    def readFile(self, file: Path) -> IPPState:
+        file_fd = file.open().fileno()
+        return IPPState(_lib.ippReadFile(file_fd, self.ffi_value))
+
+    def restore(self):
+        _lib.ippRestore(self.ffi_value)
+
+    def save(self):
+        _lib.ippSave(self.ffi_value)
+
+    def setValueTag(self, attr: IPPAttribute, value_tag: IPPTag):
+        return bool(
+            _lib.ippSetValueTag(self.ffi_value, attr.ffi_value, value_tag.value)
+        )
+
+    def write(self, http: Http) -> IPPState:
+        return IPPState(_lib.ippWriteRequest(http.ffi_value, self.ffi_value))
+
+    def writeFile(self, file: Path) -> IPPState:
+        file_fd = file.open().fileno()
+        return IPPState(_lib.ippWriteFile(file_fd, self.ffi_value))
+
     def __str__(self):
         return f"{self.__class__.__name__}(state={self.state})"
 
@@ -221,11 +302,84 @@ class IPPRequest(cupsBaseClass):
         return f"{self.__class__.__name__}(state={self.state}, statuscode={self.statuscode}, version={self.version})"
 
 
+class IPPFile(cupsBaseClass):
+    ffi_name: str = "ipp_file_t"
+
+    def close(self) -> bool:
+        ok = _lib.ippFileClose(self.ffi_value)
+        if not ok:
+            raise RuntimeError("Failed to close IPP file")
+        return ok
+
+    def expandVars(self, src: str) -> str:
+        c_dest_size = len(src) * 4 + 1
+        c_dest = _ffi.new("char []", c_dest_size)
+        size = _lib.ippFileExpandVars(
+            self.ffi_value, c_dest, _value_to_bytes(src), c_dest_size
+        )
+        return str(_bytes_to_value(c_dest[:size]))
+
+    @property
+    def fileName(self) -> str:
+        c_name = _lib.ippFileGetFileName(self.ffi_value)
+        return str(_bytes_to_value(c_name))
+
+    def getAttribute(self, name: str, value_tag: IPPTag) -> IPPAttribute:
+        return IPPAttribute(
+            _lib.ippFileGetAttribute(
+                self.ffi_value, _value_to_bytes(name), value_tag.value
+            )
+        )
+
+    def getAttributes(self) -> IPPRequest:
+        return IPPRequest(_lib.ippFileGetAttributes(self.ffi_value))
+
+    def getVar(self, name: str) -> str:
+        return str(
+            _bytes_to_value(_lib.ippFileGetVar(self.ffi_value, _value_to_bytes(name)))
+        )
+
+    @property
+    def lineNumber(self) -> int:
+        return _lib.ippFileGetLineNumber(self.ffi_value)
+
+    def readCollection(self) -> IPPRequest:
+        return IPPRequest(_lib.ippFileReadCollection(self.ffi_value))
+
+    def restorePosition(self) -> bool:
+        return bool(_lib.ippFileRestorePosition(self.ffi_value))
+
+    def savePosition(self) -> bool:
+        return bool(_lib.ippFileSavePosition(self.ffi_value))
+
+    def setAttributes(self, attrs: IPPRequest) -> bool:
+        return bool(_lib.ippFileSetAttributes(self.ffi_value, attrs.ffi_value))
+
+    def setGroupTag(self, group_tag: IPPTag) -> bool:
+        return bool(_lib.ippFileSetGroupTag(self.ffi_value, group_tag.value))
+
+    def setVar(self, name: str, value: str) -> bool:
+        return bool(
+            _lib.ippFileSetVar(
+                self.ffi_value, _value_to_bytes(name), _value_to_bytes(value)
+            )
+        )
+
+    @property
+    def token(self) -> bool:
+        c_token = _ffi.new("char []", 256)
+        return bool(
+            _bytes_to_value(_lib.ippFileReadToken(self.ffi_value, c_token, 256))
+        )
+
+    @token.setter
+    def token(self, token: str) -> None:
+        _lib.ippFileWriteToken(self.ffi_value, _value_to_bytes(token))
+
+
 @dataclass
 class IPPError(Exception):
-    """
-    Exception for IPP/CUPS request errors.
-    """
+    """Exception for IPP/CUPS request errors."""
 
     _response: IPPRequest = field(repr=False)
 

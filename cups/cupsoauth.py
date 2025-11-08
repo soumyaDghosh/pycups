@@ -1,19 +1,22 @@
-from cups.types import cupsJWT
 import json
+from datetime import datetime
+
 from cups._cups import _lib
-from cups.utils import _bytes_to_value, _value_to_bytes
 from cups.enums import CUPSOGrant
+from cups.types import cupsJWT
+from cups.utils import _bytes_to_value, _value_to_bytes
+
 
 def oAuthClearTokens(auth_uri: str, resource_uri: str) -> None:
     _lib.cupsOAuthClearTokens(auth_uri.encode(), resource_uri.encode())
 
 
-def oAuthCopyAccessToken(auth_uri: str, resource_uri: str, time: int) -> str:
+def oAuthCopyAccessToken(auth_uri: str, resource_uri: str, time: datetime) -> str:
     return _bytes_to_value(
         _lib.cupsOAuthCopyAccessToken(
-            auth_uri.encode(),
-            resource_uri.encode(),
-            time,
+            _value_to_bytes(auth_uri),
+            _value_to_bytes(resource_uri),
+            time.timestamp(),
         )
     )
 
@@ -46,7 +49,11 @@ def oAuthCopyUserId(auth_uri: str, resource_uri: str) -> cupsJWT:
 
 
 def oAuthGetAuthorizationCode(
-    auth_uri: str, metadata: dict, resource_uri: str, scopes: list[str], redirect_uri: str
+    auth_uri: str,
+    metadata: dict,
+    resource_uri: str,
+    scopes: list[str],
+    redirect_uri: str,
 ) -> str:
     return _bytes_to_value(
         _lib.cupsOAuthGetAuthorizationCode(
@@ -54,19 +61,21 @@ def oAuthGetAuthorizationCode(
             _value_to_bytes(metadata),
             resource_uri.encode(),
             _bytes_to_value(scopes),
-            redirect_uri.encode()
+            redirect_uri.encode(),
         )
     )
 
 
-def oAuthGetClientId(auth_uri: str, metadata: dict, redirect_uri: str, logo_uri: str, tos_uri: str) -> str:
+def oAuthGetClientId(
+    auth_uri: str, metadata: dict, redirect_uri: str, logo_uri: str, tos_uri: str
+) -> str:
     return _bytes_to_value(
         _lib.cupsOAuthGetClientId(
             auth_uri.encode(),
             _value_to_bytes(metadata),
             redirect_uri.encode(),
             logo_uri.encode(),
-            tos_uri.encode()
+            tos_uri.encode(),
         )
     )
 
@@ -76,7 +85,15 @@ def oAuthGetMetadata(auth_uri: str) -> dict:
     return json.loads(json_value) if json_value else {}
 
 
-def oAuthGetTokens(auth_uri: str, metadata: dict, resource_uri: str, grant_code: str, grant_type: CUPSOGrant, redirect_uri: str, access_expires: int) -> str:
+def oAuthGetTokens(
+    auth_uri: str,
+    metadata: dict,
+    resource_uri: str,
+    grant_code: str,
+    grant_type: CUPSOGrant,
+    redirect_uri: str,
+    access_expires: int,
+) -> str:
     return _bytes_to_value(
         _lib.cupsOAuthGetTokens(
             auth_uri.encode(),
@@ -85,9 +102,10 @@ def oAuthGetTokens(auth_uri: str, metadata: dict, resource_uri: str, grant_code:
             grant_code.encode(),
             grant_type.value,
             redirect_uri.encode(),
-            access_expires
+            access_expires,
         )
     )
+
 
 def oAuthMakeAuthorizationURL(
     auth_uri: str,
@@ -112,7 +130,7 @@ def oAuthMakeAuthorizationURL(
             redirect_uri.encode(),
             state.encode(),
         )
-)
+    )
 
 
 def oAuthSaveClientData(
@@ -129,7 +147,14 @@ def oAuthSaveClientData(
     )
 
 
-def oAuthSaveTokens(auth_uri: str, resource_uri: str, access_token: str, access_expires: int, user_id: str, refresh_token: str) -> None:
+def oAuthSaveTokens(
+    auth_uri: str,
+    resource_uri: str,
+    access_token: str,
+    access_expires: int,
+    user_id: str,
+    refresh_token: str,
+) -> None:
     _lib.cupsOAuthSaveTokens(
         auth_uri.encode(),
         resource_uri.encode(),

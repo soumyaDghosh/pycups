@@ -4,13 +4,15 @@ from .cups import (
     cupsJob,
     cupsJWT,
     cupsLang,
-    cupsOption,
     cupsMutex,
+    cupsOption,
     cupsPageHeader,
     cupsRaster,
-    cupsRWLock
+    cupsRWLock,
 )
-from .ipp import IPPAttribute, IPPRequest, IPPError
+from .http import Http
+from .httpaddr import HttpAddr
+from .ipp import IPPAttribute, IPPError, IPPFile, IPPRequest
 from .media import cupsMedia
 
 __all__ = [
@@ -25,7 +27,10 @@ __all__ = [
     "cupsRaster",
     "cupsRWLock",
     "cupsMedia",
+    "Http",
+    "HttpAddr",
     "IPPAttribute",
     "IPPError",
+    "IPPFile",
     "IPPRequest",
 ]

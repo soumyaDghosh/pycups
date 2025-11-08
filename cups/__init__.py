@@ -1,25 +1,4 @@
-from .connection import (
-    Connection,
-)
-from .generic import (
-    areCredentialsValidForName,
-    copyCredentialsKey,
-    copyDest,
-    getDestWithURI,
-    getEncryption,
-    setEncryption,
-    getError,
-    getPort,
-    setPort,
-    getServer,
-    setServer,
-    getUser,
-    setUser,
-    getUserAgent,
-    setUserAgent,
-    setDefaultDest,
-)
-
+from ._cups import ffi, lib
 from .cupslang import (
     langAddStrings,
     langDefault,
@@ -27,10 +6,25 @@ from .cupslang import (
     langGetEncoding,
     langGetString,
 )
+from .generic import (
+    areCredentialsValidForName,
+    copyCredentialsKey,
+    # copyDest,
+    # getDestWithURI,
+    getEncryption,
+    getError,
+    getPort,
+    getServer,
+    getUser,
+    getUserAgent,
+    setEncryption,
+    setPort,
+    setServer,
+    setUser,
+    setUserAgent,
+    # setDefaultDest,
+)
 
-from ._cups import lib, ffi
-
-del connection  # noqa
 del generic  # noqa
 
 __all__ = [

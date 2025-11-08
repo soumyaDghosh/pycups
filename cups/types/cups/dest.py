@@ -1,9 +1,13 @@
-from .option import cupsOption
-from cups.types.base import cupsBaseClass, _lib, _ffi
-from cups.utils import _bytes_to_value
+from collections.abc import Mapping
 from typing import Any, Dict, Optional
-from cups.types.ipp import IPPAttribute, IPPRequest
+
 from cups.enums.ipp import IPPOp, IPPTag
+from cups.types import Http
+from cups.types.base import _ffi, _lib, cupsBaseClass
+from cups.types.ipp import IPPAttribute, IPPRequest
+from cups.utils import _bytes_to_value
+
+from .option import cupsOption
 
 
 class cupsDest(cupsBaseClass):
@@ -29,9 +33,23 @@ class cupsDest(cupsBaseClass):
     ffi_free = "cupsFreeDests"
 
     @classmethod
+    def connectDest(cls, *, dest: "cupsDest", flags, msec: int) -> Mapping[Http, str]:
+        c_resource = _ffi.new("char[]", 256)
+        http = _lib.cupsConnectDest(
+            dest.ffi_value,
+            flags,
+            msec,
+            _ffi.NULL,
+            c_resource,
+            256,
+            _ffi.NULL,
+            _ffi.NULL,
+        )
+        return {Http(http): _bytes_to_value(c_resource)}
+
+    @classmethod
     def from_cffi_list(cls, dests: "cupsDest", count: int) -> "Dict[str, cupsDest]":
-        """
-        Convert a list of CFFI dest structs to a list of python cupsDest.
+        """Convert a list of CFFI dest structs to a list of python cupsDest.
 
         Args:
             dests (Any): The CFFI *cups_dest_t pointer to a pointer.
@@ -39,6 +57,7 @@ class cupsDest(cupsBaseClass):
 
         Returns:
             Dict[str, cupsDest]: The list of cupsDest.
+
         """
         results: Dict[str, cupsDest] = {}
         for i in range(count):
@@ -51,14 +70,14 @@ class cupsDest(cupsBaseClass):
 
     @classmethod
     def from_cffi(cls, dest: Any) -> "cupsDest":
-        """
-        Convert a single CFFI dest struct to a Python cupsDest object.
+        """Convert a single CFFI dest struct to a Python cupsDest object.
 
         Args:
             dest (Any): The CFFI cups_dest_t struct.
 
         Returns:
             cupsDest: The equivalent Python object.
+
         """
         return cls(dest)
 

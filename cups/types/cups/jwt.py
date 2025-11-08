@@ -1,9 +1,11 @@
-from cups.types.base import cupsBaseClass, _lib
-from cups.enums import CUPSJWA, CUPSJType
-from cups.utils import _bytes_to_value, _value_to_bytes
 import json
-from typing import Any
 from pathlib import Path
+from typing import Any
+
+from cups.enums import CUPSJWA, CUPSJType, CUPSJWSFormat
+from cups.types.base import _lib, cupsBaseClass
+from cups.utils import _bytes_to_value, _value_to_bytes
+
 
 class cupsJWT(cupsBaseClass):
     ffi_name = "cups_jwt_t"
@@ -21,6 +23,9 @@ class cupsJWT(cupsBaseClass):
     @property
     def algorithm(self) -> CUPSJWA:
         return CUPSJWA(_lib.cupsJWTGetAlgorithm(self.ffi_value))
+
+    def exportString(self, format: CUPSJWSFormat) -> str:
+        return _bytes_to_value(self.ffi_value, format.value)
 
     def getClaimNumber(self, claim: str) -> float:
         return _lib.cupsJWTGetClaimNumber(self.ffi_value, claim.encode())

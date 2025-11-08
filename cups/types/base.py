@@ -1,7 +1,10 @@
-from cups import _cups
+# Base class for all the types of CUPs
 
-from typing import Any
 from abc import ABC
+from functools import singledispatchmethod
+from typing import Any
+
+from cups import _cups
 
 _ffi = _cups.ffi
 _lib = _cups.lib
@@ -12,14 +15,29 @@ class cupsBaseClass(ABC):
     ffi_free: str
     ffi_value: Any
 
-    def __init__(self, args=None):
-        if args and self._is_valid_ctype(args):
-            self.ffi_value = args
+    @singledispatchmethod
+    def __init__(self, arg: Any = None) -> "cupsBaseClass":
+        if arg is None:
+            self.ffi_value = _ffi.new(f"{self.ffi_name} *")
         else:
-            if isinstance(args, str):
-                self.ffi_value = _ffi.new(f"{self.ffi_name} {args}")
-            else:
-                self.ffi_value = _ffi.new(f"{self.ffi_name} *")
+            raise NotImplementedError
+
+    @__init__.register
+    def _(self, arg: str):
+        self.ffi_value = _ffi.new(f"{self.ffi_name} {arg}")
+
+    @__init__.register(_ffi.CData)
+    def _(self, arg: Any):
+        if arg and self._is_valid_ctype(arg):
+            self.ffi_value = arg
+        else:
+            raise TypeError(
+                f"Invalid CFFI type for {self.__class__.__name__}: {type(arg)}"
+            )
+
+    # @__init__.register(type(None))
+    # def _(self, arg: None = None):
+    #     self.ffi_value = _ffi.new(f"{self.ffi_name} *")
 
     # def __del__(self, extra_args: Optional[List] = None):
     #     if self.ffi_free:
@@ -65,8 +83,7 @@ class cupsBaseClass(ABC):
 
             if ctype.kind == "pointer":
                 return ctype.item.cname == ctype_name
-            else:
-                return ctype.cname == _ffi.getctype(cls.ffi_name)
+            return ctype.cname == _ffi.getctype(cls.ffi_name)
         except:
             return False
 
