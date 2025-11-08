@@ -18,7 +18,6 @@ jobs:
           sudo apt install --yes autoconf build-essential libavahi-client-dev libnss-mdns libpng-dev libssl-dev zlib1g-dev
           git clone --recurse-submodules https://github.com/OpenPrinting/libcups
           pushd libcups
-          git checkout --recurse-submodules af31f816fe406ad944d7e429ca088605eeb7dc47
           ./configure
           make
           sudo make install
