@@ -1,4 +1,5 @@
 from enum import IntFlag
+
 from cups import _cups
 from cups.utils import _bytes_to_value
 

@@ -1,4 +1,8 @@
+import socket
+from typing import Any, Optional
+
 from cups import _cups
+from cups.enums.http import HttpEncryption, HttpStatus
 from cups.generic import (
     getEncryption,
     getPort,
@@ -9,15 +13,11 @@ from cups.generic import (
     setServer,
     setUser,
 )
-from cups.enums.http import HttpEncryption, HttpStatus
-from typing import Any, Optional
-
-from .dests import DestsMixin
-from .jobs import JobMixin
-from .base import _Base
 from cups.utils import _bytes_to_value
 
-import socket
+from .base import _Base
+from .dests import DestsMixin
+from .jobs import JobMixin
 
 _ffi = _cups.ffi
 _lib = _cups.lib
@@ -92,7 +92,9 @@ class Connection(DestsMixin, JobMixin, _Base):
         return bool(_lib.httpConnectAgain(self.http, msec, _ffi.NULL))
 
     def doAuthentication(self, method: str, resource: str) -> bool:
-        return bool(_lib.cupsDoAuthentication(self.http, method.encode(), resource.encode()))
+        return bool(
+            _lib.cupsDoAuthentication(self.http, method.encode(), resource.encode())
+        )
 
     def getPassword(self, prompt: str, method: str, resource: str) -> str:
         return _bytes_to_value(

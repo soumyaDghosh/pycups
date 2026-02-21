@@ -1,5 +1,6 @@
-from cups import _cups
 from typing import Any, Optional, Union
+
+from cups import _cups
 
 _ffi = _cups.ffi
 
@@ -14,10 +15,9 @@ def _strtobool(val: str) -> Optional[bool]:
     val = val.lower().strip()
     if val in ("y", "yes", "t", "true", "on", "1"):
         return True
-    elif val in ("n", "no", "f", "false", "off", "0"):
+    if val in ("n", "no", "f", "false", "off", "0"):
         return False
-    else:
-        return None
+    return None
 
 
 def _bytes_to_value(b: bytes) -> Optional[Union[str, bool]]:
@@ -27,7 +27,7 @@ def _bytes_to_value(b: bytes) -> Optional[Union[str, bool]]:
     string_to_bool: Optional[bool] = _strtobool(string)
     if isinstance(string_to_bool, bool):
         return string_to_bool
-    if string and string.split(",")[0] != "none":
+    if string and string.split(",", maxsplit=1)[0] != "none":
         return string
     return None
 

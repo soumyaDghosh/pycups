@@ -5,14 +5,13 @@ from typing import (
     Optional,
 )
 
+from cups.enums.ipp import IPPOp, IPPTag
+from cups.types.ipp import IPPAttribute, IPPRequest
 from cups.utils import (
     _bytes_to_value,
 )
 
-from cups.types.ipp import IPPAttribute, IPPRequest
-from cups.enums.ipp import IPPOp, IPPTag
-
-from .base import cupsBaseClass, _ffi, _lib
+from .base import _ffi, _lib, cupsBaseClass
 
 
 class cupsDestInfo(cupsBaseClass):
@@ -37,16 +36,23 @@ class cupsOption(cupsBaseClass):
 
     def toAttribute(self, ipp_req: IPPRequest, group_tag: IPPTag) -> IPPAttribute:
         """Convert this cupsOption into an IPPAttribute.
+
         Args:
             ipp_req (IPPRequest): The IPPRequest to add the attribute to.
             group_tag (IPPTag): The group tag to use for the attribute.
 
         Returns:
             IPPAttribute: The created IPPAttribute.
+
         """
-
-        return IPPAttribute(_lib.cupsEncodeOption(ipp_req.ffi_value, group_tag, self.name.encode(), self.value.encode() if self.value else b""))
-
+        return IPPAttribute(
+            _lib.cupsEncodeOption(
+                ipp_req.ffi_value,
+                group_tag,
+                self.name.encode(),
+                self.value.encode() if self.value else b"",
+            )
+        )
 
     @classmethod
     def to_cffi_list(cls, opts: "Dict[str, cupsOption]") -> Any:
@@ -64,14 +70,14 @@ class cupsOption(cupsBaseClass):
 
     @classmethod
     def from_cffi_list(cls, opts: Any, count: int) -> "Dict[str, cupsOption]":
-        """
-        Convert a list of CFFI dest structs to a list of python cupsOption.
+        """Convert a list of CFFI dest structs to a list of python cupsOption.
 
         Args:
             dests (Any): The CFFI *cups_option_t pointer.
 
         Returns:
             List[cupsOption]: The list of cupsDest.
+
         """
         results: Dict[str, cupsOption] = {}
         for i in range(count):
@@ -110,8 +116,7 @@ class cupsDest(cupsBaseClass):
 
     @classmethod
     def from_cffi_list(cls, dests: "cupsDest", count: int) -> "Dict[str, cupsDest]":
-        """
-        Convert a list of CFFI dest structs to a list of python cupsDest.
+        """Convert a list of CFFI dest structs to a list of python cupsDest.
 
         Args:
             dests (Any): The CFFI *cups_dest_t pointer to a pointer.
@@ -119,6 +124,7 @@ class cupsDest(cupsBaseClass):
 
         Returns:
             Dict[str, cupsDest]: The list of cupsDest.
+
         """
         results: Dict[str, cupsDest] = {}
         for i in range(count):
@@ -131,14 +137,14 @@ class cupsDest(cupsBaseClass):
 
     @classmethod
     def from_cffi(cls, dest: Any) -> "cupsDest":
-        """
-        Convert a single CFFI dest struct to a Python cupsDest object.
+        """Convert a single CFFI dest struct to a Python cupsDest object.
 
         Args:
             dest (Any): The CFFI cups_dest_t struct.
 
         Returns:
             cupsDest: The equivalent Python object.
+
         """
         return cls(dest)
 
@@ -268,6 +274,7 @@ class cupsJob(cupsBaseClass):
         c_job[0].creation_time = self.creation_time
         c_job[0].processing_time = self.processing_time
         return c_job
+
 
 class cupsLang(cupsBaseClass):
     ffi_name = "cups_lang_t"

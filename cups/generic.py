@@ -1,10 +1,11 @@
+from pathlib import Path
+from typing import Dict, Optional, Tuple
+
 from cups import _cups
 from cups.enums.http import HttpEncryption
 from cups.types.cups import cupsDest
 from cups.types.ipp import IPPStatus
 from cups.utils import _bytes_to_value, _value_to_bytes
-from typing import Dict, Optional, Tuple
-from pathlib import Path
 
 _ffi = _cups.ffi
 _lib = _cups.lib
@@ -49,9 +50,7 @@ def copyCredentialsKey(
 
 
 def copyDest(dest: cupsDest, dests: Dict[str, cupsDest]) -> Dict[str, cupsDest]:
-    """
-    Returns a new list of dests
-    """
+    """Returns a new list of dests"""
     num_dests = _lib.cupsCopyDest(
         dest.ffi_value, len(dests), cupsDest.to_cffi_list(dests)
     )
