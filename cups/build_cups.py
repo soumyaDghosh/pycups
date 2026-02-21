@@ -1,16 +1,28 @@
-from cffi import FFI
-import os
+"""Build the CFFI binding to libcups3."""
+
+from pathlib import Path
+
 import pkgconfig
+from cffi import FFI
 
 LIBRARY = "cups3"
-VERSION = "3.0rc4"
+VERSION = "3.0.0"
 
 
-def get_include_dirs():
-    if not (pkgconfig.installed(LIBRARY, f"<={VERSION}")):
-        raise Exception(
-            "Cannot find pkg-config file for cups3.\nIs CUPS 3.0 development libraries properly installed?"
+class CupsBuildError(Exception):
+    """Raised when the CUPS 3 development libraries cannot be found."""
+
+    def __init__(self) -> None:
+        super().__init__(
+            "Cannot find pkg-config file for cups3.\n"
+            "Is CUPS 3.0 development libraries properly installed?"
         )
+
+
+def get_include_dirs() -> tuple[list[str], list[str]]:
+    """Return (include_dirs, library_dirs) from pkg-config for cups3."""
+    if not pkgconfig.installed(LIBRARY, f"<={VERSION}"):
+        raise CupsBuildError
     cflags = [c[2:] for c in (pkgconfig.cflags(LIBRARY).split(" "))]
     libs = [
         lib[2:]
@@ -24,8 +36,7 @@ INCLUDE_DIRS, LIBRARY_DIRS = get_include_dirs()
 
 ffibuilder = FFI()
 
-cdefs = ""
-dir_path = os.path.join(os.path.dirname(__file__), "headers/")
+dir_path = Path(__file__).parent / "headers"
 headers = [
     "base.h",
     "array.h",
@@ -44,10 +55,9 @@ headers = [
     "oauth.h",
     "raster.h",
 ]
-print(dir_path)
+cdefs = ""
 for file in headers:
-    file_path = os.path.join(dir_path, file)
-    with open(file_path) as f:
+    with (dir_path / file).open() as f:
         cdefs += f.read()
 
 ffibuilder.cdef(cdefs)

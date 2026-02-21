@@ -1,8 +1,10 @@
-from cups.types.cups import cupsDest, cupsDestInfo, cupsOption
+from typing import Any, Dict
+
 from cups.enums.http import HttpStatus
 from cups.enums.ipp import IPPStatus
+from cups.types.cups import cupsDest, cupsDestInfo, cupsOption
+
 from .base import _Base, _cups
-from typing import Any, Dict
 
 _lib = _cups.lib
 

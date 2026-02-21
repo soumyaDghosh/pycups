@@ -1,11 +1,8 @@
-from cups import _cups
-from cups.types.cups import cupsDest, cupsDestInfo
-from cups.types.media import cupsMedia
-from cups.types.ipp import IPPAttribute, IPPRequest, IPPStatus, IPPError
-from cups.enums.cups import CUPSDestFlags
-from cups.enums.media import CUPSMediaFlags
-from cups.enums.ipp import IPPOp, IPPTag
 from typing import Any, Dict, Optional
+
+from cups import _cups
+from cups.enums.cups import CUPSDestFlags
+from cups.types.cups import cupsDest, cupsDestInfo
 from cups.utils import _bytes_to_value
 
 from .base import _Base

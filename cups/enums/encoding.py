@@ -1,8 +1,10 @@
 from enum import IntFlag
+
 from cups import _cups
 from cups.utils import _bytes_to_value
 
 _lib = _cups.lib
+
 
 class CUPSEncoding(IntFlag):
     BG18030 = _lib.CUPS_ENCODING_BG18030

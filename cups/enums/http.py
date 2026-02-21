@@ -1,4 +1,5 @@
 from enum import IntFlag
+
 from cups import _cups
 
 _lib = _cups.lib

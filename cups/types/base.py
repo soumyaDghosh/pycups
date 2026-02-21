@@ -1,7 +1,7 @@
-from cups import _cups
-
-from typing import Any, ClassVar
 from abc import ABC
+from typing import Any, ClassVar
+
+from cups import _cups
 
 _ffi = _cups.ffi
 _lib = _cups.lib
@@ -15,11 +15,10 @@ class cupsBaseClass(ABC):
     def __init__(self, args=None):
         if args and self._is_valid_ctype(args):
             self.ffi_value = args
+        elif isinstance(args, str):
+            self.ffi_value = _ffi.new(f"{self.ffi_name} {args}")
         else:
-            if isinstance(args, str):
-                self.ffi_value = _ffi.new(f"{self.ffi_name} {args}")
-            else:
-                self.ffi_value = _ffi.new(f"{self.ffi_name} *")
+            self.ffi_value = _ffi.new(f"{self.ffi_name} *")
 
     # def __del__(self, extra_args: Optional[List] = None):
     #     if self.ffi_free:
@@ -65,8 +64,7 @@ class cupsBaseClass(ABC):
 
             if ctype.kind == "pointer":
                 return ctype.item.cname == ctype_name
-            else:
-                return ctype.cname == _ffi.getctype(cls.ffi_name)
+            return ctype.cname == _ffi.getctype(cls.ffi_name)
         except:
             return False
 
