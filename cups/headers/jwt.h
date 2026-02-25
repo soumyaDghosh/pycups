@@ -36,7 +36,7 @@ cups_jwt_t	*cupsJWTImportString(const char *s, cups_jws_format_t format);
 cups_json_t	*cupsJWTLoadCredentials(const char *path, const char *common_name);
 cups_json_t	*cupsJWTMakePrivateKey(cups_jwa_t alg);
 cups_json_t	*cupsJWTMakePublicKey(cups_json_t *jwk);
-cups_jwt_t	*cupsJWTNew(const char *type);
+cups_jwt_t	*cupsJWTNew(const char *type, cups_json_t *claims);
 void		cupsJWTSetClaimNumber(cups_jwt_t *jwt, const char *claim, double value);
 void		cupsJWTSetClaimString(cups_jwt_t *jwt, const char *claim, const char *value);
 void		cupsJWTSetClaimValue(cups_jwt_t *jwt, const char *claim, cups_json_t *value);
